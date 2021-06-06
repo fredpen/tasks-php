@@ -2,7 +2,6 @@
 
 namespace App\Helpers;
 
-
 class ResponseHelper
 {
     public static function sendSuccess($data, $message = "Success")

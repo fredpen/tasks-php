@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 
 class Project extends Model
@@ -12,11 +13,23 @@ class Project extends Model
 
     protected $guarded = [];
 
+    public function isPublishable()
+    {
+        $params = Config::get('constants.canPublish');
+
+        foreach ($params as $key => $value) {
+            if (!$this->$key) {
+                return $value;
+            }
+        }
+        
+        return true;
+    }
+
     public function task()
     {
         return $this->belongsTo(Tasks::class, 'task_id');
     }
-
 
     public function subtask()
     {
@@ -33,11 +46,10 @@ class Project extends Model
         return $this->hasMany(Projectphoto::class);
     }
 
-    public function taskMasters()
+    public function aplliedUser()
     {
         return $this->belongsToMany(User::class, 'project_apllieduser')->withPivot('resume');
     }
-
 
     public function country()
     {
@@ -113,7 +125,4 @@ class Project extends Model
     {
         return $this->update(['status' => 'posted', 'posted_on' => $this->timeNow()]);
     }
-
 }
-
-

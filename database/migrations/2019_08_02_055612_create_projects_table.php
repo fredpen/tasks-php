@@ -3,8 +3,6 @@
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
-
-
 class CreateProjectsTable extends Migration
 {
     /**
@@ -24,7 +22,7 @@ class CreateProjectsTable extends Migration
                 $table->unsignedBigInteger('city_id')->nullable();
                 $table->unsignedBigInteger('user_id')->index();
 
-                $table->tinyInteger('model')->index(); //ref constants
+                $table->tinyInteger('model')->index()->default(1); //ref constants
                 $table->integer('num_of_taskMaster')->index()->default(1);
                 $table->float('budget')->default(0);
                 $table->boolean('isActive')->default(1)->index();
@@ -47,6 +45,7 @@ class CreateProjectsTable extends Migration
 
                 $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
                 $table->foreign('task_id')->references('id')->on('tasks');
+                $table->foreign('sub_task_id')->references('id')->on('sub_tasks');
                 $table->foreign('country_id')->references('id')->on('countries');
                 $table->foreign('region_id')->references('id')->on('regions');
                 $table->foreign('city_id')->references('id')->on('cities');

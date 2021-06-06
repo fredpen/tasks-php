@@ -8,7 +8,9 @@ use Illuminate\Database\Eloquent\Model;
 class Country extends Model
 {
     use HasFactory;
-    
+
+    protected $hidden = ['created_at', 'updated_at'];
+
     public function regions()
     {
         return $this->hasMany(Region::class);
@@ -19,7 +21,4 @@ class Country extends Model
     {
         return $this->hasMany(City::class);
     }
-
-
-
 }

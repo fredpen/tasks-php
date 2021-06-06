@@ -22,10 +22,21 @@ class User extends Authenticatable implements MustVerifyEmail
         'email_verified_at' => 'datetime',
     ];
 
+    public function ownsProject($project_id)
+    {
+        $project =  Project::query()
+            ->where('id', $project_id)
+            ->where('user_id', $this->id);
+
+        return $project->count() ? true : false;
+    }
+
     public function country()
     {
         return $this->belongsTo(Country::class);
     }
+
+
 
     public function region()
     {
@@ -50,14 +61,14 @@ class User extends Authenticatable implements MustVerifyEmail
     public function fetchskillsId()
     {
         $skillsObject = $this->skills;
-        $skillsArray = json_decode(json_encode($skillsObject), true) ;
+        $skillsArray = json_decode(json_encode($skillsObject), true);
         return array_column($skillsArray, 'id');
     }
 
     public function fetchJobsId()
     {
         $jobsObject = $this->jobs;
-        $jobsArray = json_decode(json_encode($jobsObject), true) ;
+        $jobsArray = json_decode(json_encode($jobsObject), true);
         return array_column($jobsArray, 'id');
     }
 
@@ -106,6 +117,4 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->hasMany(Project::class);
     }
-
-
 }

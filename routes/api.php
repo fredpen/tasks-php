@@ -1,25 +1,23 @@
 <?php
 
+use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\LocationController;
 use App\Http\Controllers\SubTaskController;
 use App\Http\Controllers\TasksController;
 use Illuminate\Support\Facades\Route;
 
-// roles durations and other creation details
-Route::group(['name' => 'createOPtions'], function () {
-    Route::get('createOPtions', 'CreateOptionsController@createOPtions')->name('createOPtions');
-    Route::get('roles', 'CreateOptionsController@roles')->name('roles');
-});
-
-
 // auth
-Route::post('/auth/login', [AuthController::class, 'login'])->name('login');
-Route::post('/auth/register', [AuthController::class, 'signup'])->name('register');
+Route::group(['prefix' => 'auth'], function () {
 
-Route::middleware(['auth:sanctum'])->group(function () {
-    Route::get('auth/logout',  [AuthController::class, 'logout']);
-    Route::get('auth/getUser',  [AuthController::class, 'getUser']);
-    Route::post('/auth/update-user', [AuthController::class, 'updateUser'])->name('updateUser');
+    Route::post('login', [AuthController::class, 'login'])->name('login');
+    Route::post('register', [AuthController::class, 'signup'])->name('register');
+
+    Route::middleware(['auth:sanctum'])->group(function () {
+        Route::get('logout',  [AuthController::class, 'logout']);
+        Route::get('getUser',  [AuthController::class, 'getUser']);
+        Route::post('update-user', [AuthController::class, 'updateUser'])->name('updateUser');
+    });
 });
 
 
@@ -50,16 +48,30 @@ Route::group(['prefix' => 'subTask', 'name' => 'subTask'], function () {
     });
 });
 
+// location
+Route::group(['prefix' => 'location', 'name' => 'location'], function () {
+    Route::get('countries', [LocationController::class, 'countries']);
+    Route::get('regions_in_a_country/{countryId}', [LocationController::class, 'regions']);
+    Route::get('cities_in_a_region/{regionId}',  [LocationController::class, 'cities']);
+});
+
 
 // Projects
 Route::group(['prefix' => 'project', 'name' => 'project'], function () {
 
-    Route::get('all', 'ProjectController@index')->name('all');
-    Route::get('user-projects', 'ProjectController@usersProject')->name('usersProject');
-    Route::post('store', 'ProjectController@store')->name('store');
-    Route::get('/{projectId}/show', 'ProjectController@show')->name('show');
-    Route::get('/{projectId}/delete', 'ProjectController@delete')->name('delete')->middleware(['auth:api', 'isAdmin']);
-    Route::post('/{projectId}/update', 'ProjectController@update')->name('update');
+    Route::get('all', [ProjectController::class, 'index'])->name('all');
+    Route::get('/{projectId}/show', [ProjectController::class, 'show']);
+
+    Route::middleware(['auth:sanctum'])->group(function () {
+        Route::get('my_projects', [ProjectController::class, 'usersProject']);
+        Route::post('store', [ProjectController::class, 'store']);
+
+        Route::middleware(['projectAdminRight'])->group(function () {
+            Route::get('publish/{projectId}', [ProjectController::class, 'publish']);
+            Route::delete('delete', [ProjectController::class, 'delete']);
+            Route::patch('update', [ProjectController::class, 'update']);
+        });
+    });
 });
 
 // Projects status
@@ -69,11 +81,7 @@ Route::group(['prefix' => 'update-project-status', 'name' => 'projectStatus'], f
 });
 
 // location controller
-Route::group(['prefix' => 'location', 'name' => 'location'], function () {
-    Route::get('countries', 'LocationController@countries')->name('countries');
-    Route::get('regions/{countryId}', 'LocationController@regions')->name('regions');
-    Route::get('city/{regionId}', 'LocationController@cities')->name('cities');
-});
+
 
 // Projects assign and application
 Route::group(['prefix' => 'project-assignment', 'name' => 'projectAssignment'], function () {
@@ -127,3 +135,11 @@ Route::group(['prefix' => 'project-application', 'name' => 'projectAssignment'],
 //     Route::post('/pay', 'RaveController@initialize')->name('pay');
 //     Route::post('/rave/callback', 'RaveController@callback')->name('callback');
 //     Route::get('/{project}/payment', 'RaveController@payment')->name('payment');
+
+
+
+// roles durations and other creation details
+Route::group(['name' => 'createOPtions'], function () {
+    Route::get('createOPtions', 'CreateOptionsController@createOPtions')->name('createOPtions');
+    Route::get('roles', 'CreateOptionsController@roles')->name('roles');
+});

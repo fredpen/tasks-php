@@ -8,7 +8,9 @@ use Illuminate\Database\Eloquent\Model;
 class Region extends Model
 {
     use HasFactory;
-    
+
+    protected $hidden = ['created_at', 'updated_at'];
+
     public function country()
     {
         return $this->belongsTo(Country::class);

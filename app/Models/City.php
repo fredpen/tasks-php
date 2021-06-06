@@ -9,15 +9,15 @@ class City extends Model
 {
     use HasFactory;
 
-    public function region ()
+    protected $hidden = ['latitude', 'longitude', 'created_at', 'updated_at'];
+
+    public function region()
     {
         return $this->belongsTo(Region::class);
     }
 
-    public static function fetchCitiesWithRegionId ($regionId)
+    public static function fetchCitiesWithRegionId($regionId)
     {
         return City::where('region_id', $regionId)->get(['id', 'name']);
     }
-
-
 }

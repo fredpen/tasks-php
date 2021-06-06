@@ -17,10 +17,10 @@ class isAdmin
      */
     public function handle($request, Closure $next)
     {
-        if (!Auth::user()->isAdmin()) {
+        if (!$request->user()->isAdmin()) {
             return ResponseHelper::unAuthorised("You need admin priviledges");
         }
-        
+
         return $next($request);
     }
 }

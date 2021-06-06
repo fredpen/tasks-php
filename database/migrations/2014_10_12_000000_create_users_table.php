@@ -26,11 +26,11 @@ class CreateUsersTable extends Migration
                 $table->unsignedBigInteger('city_id')->nullable();
                 $table->longText('address')->nullable();
                 $table->string('revenue')->nullable();
-                $table->integer('orders_out')->nullable();
-                $table->integer('orders_in')->nullable();
+                $table->integer('orders_out')->default(0);
+                $table->integer('orders_in')->default(0);
                 $table->string('email')->unique();
                 $table->string('imageurl')->nullable();
-                $table->integer('ratings')->nullable()->default(1);
+                $table->integer('ratings')->default(100);
                 $table->string('linkedln')->unique()->nullable();
                 $table->longText('bio')->nullable();
                 $table->timestamp('email_verified_at')->nullable();

@@ -48,5 +48,23 @@ return [
         '3' => 'Experienced',
         '4' => 'Expert',
         '5' => 'Veteran'
+    ],
+
+    // publishable params
+    'canPublish' =>  [
+        'task_id' => 'task id is missing',
+        'sub_task_id' => 'sub task id is missing',
+        'country_id' => 'country id is missing',
+        'region_id' => 'region id is missing',
+        'city_id' => 'city id is missing',
+        'model' => 'Projet type(model) is missing',
+        'num_of_taskMaster' => 'Number of task master is missing',
+        'budget' => 'Budget is missing',
+        'experience' => 'experience is missing',
+        'proposed_start_date' => 'proposed start date is missing',
+        'description' => 'description is missing',
+        'title' => 'title is missing',
+        'address' => 'address is missing',
+        'duration' => 'duration is missing'
     ]
 ];

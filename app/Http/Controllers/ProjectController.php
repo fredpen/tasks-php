@@ -2,132 +2,131 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\SubTask;
-use App\Models\Tasks;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use App\Models\Country;
-use App\Models\Region;
-use App\Models\City;
 use App\Helpers\ResponseHelper;
 use App\Models\Project;
-use Illuminate\Support\Facades\Validator;
 
 class ProjectController extends Controller
 {
-    protected $project;
-
-    public function __construct(Project $project)
-    {
-        $this->middleware(['auth:api', 'verifyEmail', 'isActive'])->except(['show', 'index']);
-        $this->project = $project;
-    }
-
     public function index()
     {
-        $projects =  $this->project;
+        $projects =  Project::query();
+
         return $projects->count() ?
-            ResponseHelper::sendSuccess($projects->paginate(20)) : ResponseHelper::notFound();
+            ResponseHelper::sendSuccess($projects->with(['task:name,id', 'subtask:name,id', 'owner:name,id,orders_out,orders_in,ratings', 'country:name,id', 'region:name,id', 'city:name,id'])->paginate(10)) : ResponseHelper::notFound();
     }
 
-    public function usersProject()
+    public function usersProject(Request $request)
     {
-        $projects =  $this->project->where(['user_id' => Auth::id(), 'deleted_on' => null]);
+        $projects =  Project::query()
+            ->where('user_id', $request->user()->id)
+            ->where('deleted_on', null);
+
         return $projects->count() ?
-            ResponseHelper::sendSuccess($projects->paginate(20)) : ResponseHelper::notFound();
-    }
-
-    public function store(Request $request)
-    {
-        $validatedData = $this->validateCreateRequest($request->all());
-        if ($validatedData->fails()) {
-            return ResponseHelper::badRequest($validatedData->errors()->first());
-        }
-        $createRequest = $request->all();
-        $createRequest['user_id'] = Auth::id();
-
-        $project =  $this->project->create($createRequest);
-        return $project ? ResponseHelper::sendSuccess($project) : ResponseHelper::serverError();
-        // $project->owner->notify((new projectCreated));
+            ResponseHelper::sendSuccess($projects->with(['task:name,id', 'subtask:name,id', 'country:name,id', 'region:name,id', 'city:name,id'])->paginate(10)) : ResponseHelper::notFound();
     }
 
     public function show($projectId)
     {
-        $project =  $this->project->where(['id' => $projectId, 'deleted_on' => null]);
-        return $project ?
-            ResponseHelper::sendSuccess($project->first()) : ResponseHelper::notFound();
+        $projects =  Project::query()
+            ->where('deleted_on', null)
+            ->where('id', $projectId);
+
+        return $projects->count() ?
+            ResponseHelper::sendSuccess($projects->with(['task:name,id', 'subtask:name,id', 'owner:name,id,orders_out,ratings,orders_in', 'country:name,id', 'region:name,id', 'city:name,id', 'photos:url,project_id'])->get()) : ResponseHelper::notFound();
     }
 
-    public function update(Request $request, $projectId)
+    public function store(Request $request)
     {
-        $project =  $this->project->where(['id' => $projectId, 'deleted_on' => null, 'user_id' => Auth::id()])->first();
-        if (!$project) {
+        $data = $this->validateProjectRequest($request);
+        $data['user_id'] = $request->user()->id;
+        $project =  Project::create($data);
+
+        return $project ? ResponseHelper::sendSuccess([]) : ResponseHelper::serverError();
+        // $project->owner->notify((new projectCreated));
+    }
+
+
+    public function publish($projectId)
+    {
+        $project =  Project::query()
+            ->where('deleted_on', null)
+            ->where('id', $projectId);
+
+        if (!$project->count()) {
             return ResponseHelper::notFound();
         }
 
-        $validatedData = $this->validateCreateRequest($request->all());
-        if ($validatedData->fails()) {
-            return ResponseHelper::badRequest($validatedData->errors()->first());
+        $publisable = $project->first()->isPublishable();
+        if ($publisable !== true) {
+            return ResponseHelper::badRequest($publisable);
         }
-        $project =  $project->update($request->all());
-        return $project ? ResponseHelper::sendSuccess($project) : ResponseHelper::serverError();
-        // $project->posted();
+
+        $update = $project->update(['posted_on' => now()]);
+        return $update ?
+            ResponseHelper::sendSuccess([], 'Project is now live') : ResponseHelper::serverError();
+
         // $project->owner->notify((new ProjectPosted)->delay(10)->onQueue('notifs'));
     }
 
-
-    public function delete($projectId)
+    public function update(Request $request)
     {
-        $project =  $this->project->where(['id' => $projectId, 'deleted_on' => null])->first();
-        if (!$project) {
+        $this->validateProjectRequest($request);
+
+        $project =  Project::query()
+            ->where('deleted_on', null)
+            ->where('id', $request->project_id);
+
+        if (!$project->count()) {
             return ResponseHelper::notFound();
         }
-        $project->delete();
-        return $project ? ResponseHelper::sendSuccess([]) : ResponseHelper::serverError();
+
+        $update = $project->update($request->except(['id', 'user_id', 'isActive', 'status', 'posted_on', 'started_on', 'completed_on', 'cancelled_on', 'deleted_on', 'project_id']));
+
+        return $update ?
+            ResponseHelper::sendSuccess([], 'update successful') : ResponseHelper::serverError();
+
+        // $project->owner->notify((new ProjectPosted)->delay(10)->onQueue('notifs'));
+    }
+
+    public function delete(Request $request)
+    {
+        $project =  Project::query()
+            ->where('deleted_on', null)
+            ->where('id', $request->project_id);
+
+        if (!$project->count()) {
+            return ResponseHelper::notFound();
+        }
+
+        if ($project->first()->posted_on == null) {
+            return $project->delete() ?
+                ResponseHelper::sendSuccess([]) : ResponseHelper::serverError();
+        }
+
+        return $project->update(['deleted_on' => now()]) ?
+            ResponseHelper::sendSuccess([]) : ResponseHelper::serverError();
         // $project->owner->notify((new ProjectCancelled)->delay(10));
     }
 
-
-    public function ajax(Request $request, $id)
+    private function validateProjectRequest($request)
     {
-        $project = Project::findOrFail($id);
-        $this->authorize('edit', $project);
-        $project->update([$request->field => $request->value]);
-        if ($request->field == 'task_id') return SubTask::fetchSubtasksWithTaskId($request->value);
-        if ($request->field == 'country_id') return Region::fetchRegionsWithCountryId($request->value);
-        if ($request->field == 'region_id') return City::fetchCitiesWithRegionId($request->value);
-    }
+        return $request->validate([
+            'task_id' => 'integer|exists:tasks,id',
+            'sub_task_id' => 'integer|exists:sub_tasks,id',
+            'country_id' => 'integer|exists:countries,id',
+            'region_id' => 'integer|exists:regions,id',
+            'city_id' => 'integer|exists:cities,id',
 
-    // this is where i stop i dont knw what to do with it yet
-    private function draftProjects($array)
-    {
-        return $array->filter(function ($items) {
-            return $items->status == 'Draft';
-        });
-    }
-
-    private function notDraftProjects($array)
-    {
-        return $array->filter(function ($items) {
-            return $items->status != 'Draft';
-        });
-    }
-
-    private function validateCreateRequest($request)
-    {
-        return Validator::make($request, [
-            'model' => 'required',
-            'task_id' => 'required|integer',
-            'num_of_taskMaster' => 'required|integer',
-            'budget' => 'required',
-            'experience' => 'required',
-            'proposed_start_date' => 'required',
-            'description' => 'required',
-            'title' => 'required',
-            'sub_task_id' => 'required|integer',
-            'country_id' => 'required|integer',
-            'city_id' => 'required|integer',
-            'duration' => 'required',
+            'model' => 'integer|min:1',
+            'num_of_taskMaster' => 'integer|min:1',
+            'budget' => 'number|min:10',
+            'experience' => 'integer',
+            'proposed_start_date' => 'date',
+            'description' => 'string',
+            'title' => 'string',
+            'duration' => 'string',
+            'address' => 'string',
         ]);
     }
 }
