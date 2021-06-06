@@ -2,10 +2,12 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Tasks extends Model
 {
+    use HasFactory;
 
     // protected $with = ['subTasks:id,name,task_id'];
     protected $guarded = [];
@@ -16,7 +18,7 @@ class Tasks extends Model
         return ucfirst($value);
     }
 
-    
+
     public function subTasks()
     {
         return $this->hasMany(SubTask::class, 'task_id');

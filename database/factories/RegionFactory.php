@@ -12,7 +12,7 @@ class RegionFactory extends Factory
     public function definition()
     {
         return [
-            'name' => $this->faker->name(),
+            'name' => $this->faker->state(),
             'code' => $this->faker->ean8,
             'country_id' => $this->faker->numberBetween($min = 1, $max = 10)
         ];

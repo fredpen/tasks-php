@@ -2,8 +2,10 @@
 
 namespace Database\Seeders;
 
+use App\Models\City;
 use App\Models\Country;
 use App\Models\Region;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -15,14 +17,10 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
-        $user = Country::factory()
-            ->has(Region::factory()->count(10), 'regions')
-            ->create();
-        // $this->call([
-        //     UserSeeder::class,
-        //     UserSeeder::class,
-        //     PostSeeder::class,
-        //     CommentSeeder::class,
-        // ]);
+        $this->call([
+            LocationSeeder::class,
+            UserSeeder::class,
+            TaskSeeder::class,
+        ]);
     }
 }
