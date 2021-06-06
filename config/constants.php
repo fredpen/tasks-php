@@ -8,25 +8,26 @@ return [
         '02' => 'Task Master',
     ],
 
+    // projectModel
+    'projectModels' => [
+        '01' => 'remote',
+        '02' => 'on-site',
+    ],
+
     // allowed upload
     'userUpdate' => [
         'name',  'title',  'phone_number',  'country_id',  'region_id',  'city_id',  'address', "imageurl", "linkedln", "bio", "email", "password"
     ],
 
-    // meta data
-    'metaData' =>  [
-        array('metaname' => 'color', 'metavalue' => 'blue'),
-        array('metaname' => 'size', 'metavalue' => 'big')
-    ],
-
     // status
-    'status' => [
-        '0' => 'created',
+    'projectStatus' => [
+        '0' => 'Draft',
         '1' => 'posted',
         '2' => 'started',
         '3' => 'cancelled',
         '4' => 'completed',
         '5' => 'deleted',
+
     ],
 
     // project duration
@@ -41,14 +42,11 @@ return [
     ],
 
     // level of expertise
-    'expertise' =>  [
-        'Beginner' => 'Average',
-        'Experienced' => 'Experienced',
-        'Expert' => 'Expert',
-        'veteran' => 'Veteran'
+    'projectExpertise' =>  [
+        '1' => 'Junior',
+        '2' => 'Average',
+        '3' => 'Experienced',
+        '4' => 'Expert',
+        '5' => 'Veteran'
     ]
-
-
-
-
 ];

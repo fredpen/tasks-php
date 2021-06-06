@@ -2,27 +2,50 @@
 
 namespace Database\Factories;
 
+use App\Models\Country;
 use App\Models\Project;
+use App\Models\Tasks;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Facades\Config;
 
 class ProjectFactory extends Factory
 {
-    /**
-     * The name of the factory's corresponding model.
-     *
-     * @var string
-     */
     protected $model = Project::class;
 
-    /**
-     * Define the model's default state.
-     *
-     * @return array
-     */
     public function definition()
     {
+        $models = array_keys(Config::get('constants.projectModels'));
+        $projectStatus = array_keys(Config::get('constants.projectStatus'));
+        $projectDuration = array_keys(Config::get('constants.projectDuration'));
+        $projectExpertise = array_keys(Config::get('constants.projectExpertise'));
+        $task = Tasks::inRandomOrder()->first();
+        $country = Country::inRandomOrder()->first();
+        $region = $country->regions->first();
+
         return [
-            //
+            'user_id' => User::inRandomOrder()->first(),
+            'model' => $this->faker->randomElement($models),
+            'num_of_taskMaster' => $this->faker->numberBetween(0, 10),
+            'budget' => $this->faker->randomNumber(5),
+            'isActive' => $this->faker->randomElement([0, 1]),
+            'status' => $this->faker->randomElement($projectStatus),
+            'amount_paid' => $this->faker->randomNumber(5),
+            'experience' => $this->faker->randomElement($projectExpertise),
+            'posted_on' => now(),
+            'started_on' => now(),
+            'completed_on' => now(),
+            'cancelled_on' => now(),
+            'deleted_on' => now(),
+            'description' =>  $this->faker->paragraph(2),
+            'title' =>  $this->faker->sentence(),
+            'task_id' =>  $task,
+            'sub_task_id' =>  $task->subTasks->first(),
+            'country_id' =>  $country,
+            'region_id' =>  $region,
+            'city_id' =>  $region->cities->first(),
+            'address' =>  $this->faker->unique()->address(),
+            'duration' =>   $this->faker->randomElement($projectDuration),
         ];
     }
 }

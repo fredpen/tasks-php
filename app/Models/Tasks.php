@@ -9,15 +9,7 @@ class Tasks extends Model
 {
     use HasFactory;
 
-    // protected $with = ['subTasks:id,name,task_id'];
     protected $guarded = [];
-
-
-    public function getNameAttribute($value)
-    {
-        return ucfirst($value);
-    }
-
 
     public function subTasks()
     {

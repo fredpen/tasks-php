@@ -18,6 +18,8 @@ class CreateProjectphotosTable extends Migration
             $table->string('url')->index();
             $table->unsignedBigInteger('project_id')->index();
             $table->timestamps();
+
+            $table->foreign('project_id')->references('id')->on('projects')->onDelete('cascade');
         });
     }
 
@@ -31,4 +33,3 @@ class CreateProjectphotosTable extends Migration
         Schema::dropIfExists('projectphotos');
     }
 }
-
