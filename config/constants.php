@@ -52,19 +52,19 @@ return [
 
     // publishable params
     'canPublish' =>  [
-        'task_id' => 'task id is missing',
-        'sub_task_id' => 'sub task id is missing',
-        'country_id' => 'country id is missing',
-        'region_id' => 'region id is missing',
-        'city_id' => 'city id is missing',
-        'model' => 'Projet type(model) is missing',
-        'num_of_taskMaster' => 'Number of task master is missing',
-        'budget' => 'Budget is missing',
-        'experience' => 'experience is missing',
-        'proposed_start_date' => 'proposed start date is missing',
-        'description' => 'description is missing',
-        'title' => 'title is missing',
-        'address' => 'address is missing',
-        'duration' => 'duration is missing'
+        'task_id' => 'task id ',
+        'sub_task_id' => 'sub task id ',
+        'country_id' => 'country id ',
+        'region_id' => 'region id ',
+        'city_id' => 'city id ',
+        'model' => 'Projet type(model) ',
+        'num_of_taskMaster' => 'Number of task master ',
+        'budget' => 'Budget ',
+        'experience' => 'experience ',
+        'proposed_start_date' => 'proposed start date ',
+        'description' => 'description ',
+        'title' => 'title ',
+        'address' => 'address ',
+        'duration' => 'duration '
     ]
 ];

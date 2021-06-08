@@ -2,29 +2,18 @@
 
 namespace App\Models;
 
+use App\Traits\ProjectTraits;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Support\Facades\Config;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\DB;
+
 
 class Project extends Model
 {
-    use HasFactory;
+    use HasFactory, ProjectTraits, SoftDeletes;
 
     protected $guarded = [];
-
-    public function isPublishable()
-    {
-        $params = Config::get('constants.canPublish');
-
-        foreach ($params as $key => $value) {
-            if (!$this->$key) {
-                return $value;
-            }
-        }
-        
-        return true;
-    }
 
     public function task()
     {
@@ -66,35 +55,6 @@ class Project extends Model
         return $this->belongsTo(City::class);
     }
 
-    public function isAssigned()
-    {
-        return count(DB::table('project_assigneduser')->where('project_id', $this->id)->get('id')) > 0;
-    }
-
-    public function hasBeenAssigned($user_id)
-    {
-        $project = DB::table('project_assigneduser')->where([
-            'project_id' => $this->id,
-            'user_id' => $user_id
-        ])->get();
-        return count($project) > 0;
-    }
-
-    public function updateStatus($status)
-    {
-        if ($status == "completed") {
-            return $this->completed();
-        } elseif ($status == "cancelled") {
-            return $this->cancelled();
-        } elseif ($status == "deleted") {
-            return $this->delete();
-        } elseif ($status == "started") {
-            return $this->live();
-        } elseif ($status == "posted") {
-            return $this->posted();
-        }
-    }
-
     public function completed()
     {
         return $this->update(['status' => 'completed', 'completed_on' => $this->timeNow()]);
@@ -104,11 +64,6 @@ class Project extends Model
     {
         if ($this->status == 'Draft')  return $this->delete();
         return $this->update(['status' => 'cancelled', 'cancelled_on' => $this->timeNow()]);
-    }
-
-    public function delete()
-    {
-        return $this->update(['status' => 'deleted', 'deleted_on' => $this->timeNow()]);
     }
 
     public function live()

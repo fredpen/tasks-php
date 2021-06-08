@@ -22,21 +22,10 @@ class User extends Authenticatable implements MustVerifyEmail
         'email_verified_at' => 'datetime',
     ];
 
-    public function ownsProject($project_id)
-    {
-        $project =  Project::query()
-            ->where('id', $project_id)
-            ->where('user_id', $this->id);
-
-        return $project->count() ? true : false;
-    }
-
     public function country()
     {
         return $this->belongsTo(Country::class);
     }
-
-
 
     public function region()
     {
@@ -48,38 +37,14 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->belongsTo(City::class);
     }
 
-    public function skills()
+    public function subTasks()
     {
         return $this->belongsToMany(SubTask::class, 'user_sub_task');
     }
 
-    public function jobs()
+    public function tasks()
     {
         return $this->belongsToMany(Tasks::class, 'user_tasks', 'user_id', 'task_id');
-    }
-
-    public function fetchskillsId()
-    {
-        $skillsObject = $this->skills;
-        $skillsArray = json_decode(json_encode($skillsObject), true);
-        return array_column($skillsArray, 'id');
-    }
-
-    public function fetchJobsId()
-    {
-        $jobsObject = $this->jobs;
-        $jobsArray = json_decode(json_encode($jobsObject), true);
-        return array_column($jobsArray, 'id');
-    }
-
-    public function isTaskMaster()
-    {
-        return $this->role_id == 2 ? true : false;
-    }
-
-    public function isTaskGiver()
-    {
-        return $this->role_id == 1 ? true : false;
     }
 
     public function isAdmin()
@@ -97,20 +62,9 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->isActive;
     }
 
-    public function hasApplied($project_id)
+    public function myApplications()
     {
-        $hasApplied = ProjectUser::where(['project_id' => $project_id, 'user_id' => $this->id])->first();
-        return $hasApplied ? 1 : 0;
-    }
-
-    public function appliedProjects() //applied projects
-    {
-        return $this->belongsToMany(Project::class, 'project_apllieduser');
-    }
-
-    public function assignedProjects() //assigned projects
-    {
-        return $this->belongsToMany(Project::class, 'project_assigneduser')->withPivot('status');
+        return $this->hasMany(ProjectApplications::class);
     }
 
     public function projects() //created projects

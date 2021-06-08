@@ -35,7 +35,7 @@ class CreateProjectsTable extends Migration
                 $table->date('started_on')->nullable();
                 $table->date('completed_on')->nullable();
                 $table->date('cancelled_on')->nullable();
-                $table->date('deleted_on')->nullable();
+                $table->softDeletes();
 
                 $table->longText('description')->nullable();
                 $table->longText('title')->nullable();

@@ -36,7 +36,6 @@ class ProjectFactory extends Factory
             'started_on' => $this->faker->randomElement([now(), null]),
             'completed_on' => $this->faker->randomElement([now(), null]),
             'cancelled_on' => $this->faker->randomElement([now(), null]),
-            'deleted_on' => $this->faker->randomElement([now(), null]),
             'description' =>  $this->faker->paragraph(2),
             'title' =>  $this->faker->sentence(),
             'task_id' =>  $task,

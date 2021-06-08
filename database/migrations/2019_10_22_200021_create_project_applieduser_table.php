@@ -13,15 +13,21 @@ class CreateProjectApplieduserTable extends Migration
      */
     public function up()
     {
-        Schema::create('project_apllieduser', function (Blueprint $table) {
+        Schema::create('project_applications', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->unsignedBigInteger('project_id');
-            $table->unsignedBigInteger('user_id');
+            $table->unsignedBigInteger('project_id')->index();
+            $table->unsignedBigInteger('user_id')->index();
             $table->string('resume')->nullable()->index();
-            $table->timestamps();
+            $table->boolean('assigned')->index()->default(false);
+            $table->boolean('isCompleted')->index()->default(false);
+            $table->tinyInteger('buyer_rating')->index()->nullable();
+            $table->tinyInteger('seller_rating')->index()->nullable();
 
-            // $table->foreign('project_id')->references('id')->on('projects')->onDelete('cascade');
-            // $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->timestamps();
+            $table->softDeletes();
+
+            $table->foreign('project_id')->references('id')->on('projects')->onDelete('cascade');
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
         });
     }
 

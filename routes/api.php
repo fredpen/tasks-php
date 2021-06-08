@@ -3,6 +3,7 @@
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\LocationController;
+use App\Http\Controllers\ProjectApplicationController;
 use App\Http\Controllers\SubTaskController;
 use App\Http\Controllers\TasksController;
 use Illuminate\Support\Facades\Route;
@@ -74,28 +75,33 @@ Route::group(['prefix' => 'project', 'name' => 'project'], function () {
     });
 });
 
-// Projects status
-Route::group(['prefix' => 'update-project-status', 'name' => 'projectStatus'], function () {
+// Projects application
+Route::group(['prefix' => 'project-applications', 'name' => 'project'], function () {
 
-    Route::get('/{projectId}/{status}', 'ProjectStatusController@updateStatus')->name('update');
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::post('/apply',  [ProjectApplicationController::class, 'apply']);
+        Route::post('/withdraw', [ProjectApplicationController::class, 'withdraw']);
+        Route::get('/my-applications', [ProjectApplicationController::class, 'myApplications']);
+    });
+
+    Route::get('/{projectId}', [ProjectApplicationController::class, 'applications']);
 });
+
+
+// Projects status
+// Route::group(['prefix' => 'update-project-status', 'name' => 'projectStatus'], function () {
+
+//     Route::get('/{projectId}/{status}', 'ProjectStatusController@updateStatus')->name('update');
+// });
 
 // location controller
 
 
 // Projects assign and application
-Route::group(['prefix' => 'project-assignment', 'name' => 'projectAssignment'], function () {
-    Route::get('/assigned-users/{projectId}', 'ProjectAssignmentController@projectAssignedUser')->name('projectAssignedUser');
-    Route::get('/accept/{projectId}', 'ProjectAssignmentController@accept')->name('accept');
-});
-
-// Projects application
-Route::group(['prefix' => 'project-application', 'name' => 'projectAssignment'], function () {
-    Route::post('/apply', 'ProjectApplicationController@apply')->name('apply');
-    Route::get('/with-draw-application/{projectId}', 'ProjectApplicationController@withDrawApplication')->name('withDrawApplication');
-    Route::get('/applications/{projectId}', 'ProjectApplicationController@projectApplications')->name('projectApplications');
-    Route::get('/my-applications', 'ProjectApplicationController@myApplications')->name('myApplications');
-});
+// Route::group(['prefix' => 'project-assignment', 'name' => 'projectAssignment'], function () {
+//     Route::get('/assigned-users/{projectId}', 'ProjectAssignmentController@projectAssignedUser')->name('projectAssignedUser');
+//     Route::get('/accept/{projectId}', 'ProjectAssignmentController@accept')->name('accept');
+// });
 
 ///////////////////////////////////////////////////////////////////////
 
@@ -139,7 +145,7 @@ Route::group(['prefix' => 'project-application', 'name' => 'projectAssignment'],
 
 
 // roles durations and other creation details
-Route::group(['name' => 'createOPtions'], function () {
-    Route::get('createOPtions', 'CreateOptionsController@createOPtions')->name('createOPtions');
-    Route::get('roles', 'CreateOptionsController@roles')->name('roles');
-});
+// Route::group(['name' => 'createOPtions'], function () {
+//     Route::get('createOPtions', 'CreateOptionsController@createOPtions')->name('createOPtions');
+//     Route::get('roles', 'CreateOptionsController@roles')->name('roles');
+// });

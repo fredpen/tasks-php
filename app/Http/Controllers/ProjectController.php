@@ -19,8 +19,7 @@ class ProjectController extends Controller
     public function usersProject(Request $request)
     {
         $projects =  Project::query()
-            ->where('user_id', $request->user()->id)
-            ->where('deleted_on', null);
+            ->where('user_id', $request->user()->id);
 
         return $projects->count() ?
             ResponseHelper::sendSuccess($projects->with(['task:name,id', 'subtask:name,id', 'country:name,id', 'region:name,id', 'city:name,id'])->paginate(10)) : ResponseHelper::notFound();
@@ -29,7 +28,6 @@ class ProjectController extends Controller
     public function show($projectId)
     {
         $projects =  Project::query()
-            ->where('deleted_on', null)
             ->where('id', $projectId);
 
         return $projects->count() ?
@@ -50,7 +48,6 @@ class ProjectController extends Controller
     public function publish($projectId)
     {
         $project =  Project::query()
-            ->where('deleted_on', null)
             ->where('id', $projectId);
 
         if (!$project->count()) {
@@ -71,10 +68,10 @@ class ProjectController extends Controller
 
     public function update(Request $request)
     {
+
         $this->validateProjectRequest($request);
 
         $project =  Project::query()
-            ->where('deleted_on', null)
             ->where('id', $request->project_id);
 
         if (!$project->count()) {
@@ -91,20 +88,19 @@ class ProjectController extends Controller
 
     public function delete(Request $request)
     {
-        $project =  Project::query()
-            ->where('deleted_on', null)
-            ->where('id', $request->project_id);
+        $request->validate(['project_id' => 'required|integer|exists:projects,id']);
 
-        if (!$project->count()) {
+        $project =  Project::query()->where('id', $request->project_id);
+        if (! $project->count()) {
             return ResponseHelper::notFound();
         }
 
-        if ($project->first()->posted_on == null) {
-            return $project->delete() ?
-                ResponseHelper::sendSuccess([]) : ResponseHelper::serverError();
+        $errorMessage = $project->first()->isDeletable();
+        if ($errorMessage !== true) {
+            return ResponseHelper::badRequest($errorMessage);
         }
 
-        return $project->update(['deleted_on' => now()]) ?
+        return $project->delete() ?
             ResponseHelper::sendSuccess([]) : ResponseHelper::serverError();
         // $project->owner->notify((new ProjectCancelled)->delay(10));
     }
@@ -112,21 +108,21 @@ class ProjectController extends Controller
     private function validateProjectRequest($request)
     {
         return $request->validate([
-            'task_id' => 'integer|exists:tasks,id',
-            'sub_task_id' => 'integer|exists:sub_tasks,id',
-            'country_id' => 'integer|exists:countries,id',
-            'region_id' => 'integer|exists:regions,id',
-            'city_id' => 'integer|exists:cities,id',
+            'task_id' => 'nullable|integer|exists:tasks,id',
+            'sub_task_id' => 'nullable|integer|exists:sub_tasks,id',
+            'country_id' => 'nullable|integer|exists:countries,id',
+            'region_id' => 'nullable|integer|exists:regions,id',
+            'city_id' => 'nullable|integer|exists:cities,id',
 
-            'model' => 'integer|min:1',
-            'num_of_taskMaster' => 'integer|min:1',
-            'budget' => 'number|min:10',
-            'experience' => 'integer',
-            'proposed_start_date' => 'date',
-            'description' => 'string',
-            'title' => 'string',
-            'duration' => 'string',
-            'address' => 'string',
+            'model' => 'nullable|integer|min:1',
+            'num_of_taskMaster' => 'nullable|integer|min:1',
+            'budget' => 'nullable|numeric|min:10',
+            'experience' => 'nullable|integer',
+            'proposed_start_date' => 'nullable|date',
+            'description' => 'nullable|string',
+            'title' => 'nullable|string',
+            'duration' => 'nullable|string',
+            'address' => 'nullable|string',
         ]);
     }
 }
