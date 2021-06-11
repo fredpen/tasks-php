@@ -25,7 +25,7 @@ Route::group(['prefix' => 'auth'], function () {
 // tasks
 Route::group(['prefix' => 'task', 'name' => 'task'], function () {
 
-    Route::get('all', [TasksController::class, 'index'])->name('all');
+    Route::get('all', [TasksController::class, 'index']);
     Route::get('/{taskId}/show', [TasksController::class, 'show'])->name('show');
     Route::get('all-with-subtasks', [TasksController::class, 'taskWithSubTasks']);
 
