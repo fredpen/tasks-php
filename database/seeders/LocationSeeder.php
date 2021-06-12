@@ -22,7 +22,7 @@ class LocationSeeder extends Seeder
 
         DB::unprepared($countriesSql);
         DB::unprepared($regionsPath);
-        // DB::unprepared($cityPath);
+        DB::unprepared($cityPath);
 
         // Country::factory()
         //     ->count(10)
