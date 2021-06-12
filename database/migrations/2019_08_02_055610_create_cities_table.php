@@ -17,13 +17,9 @@ class CreateCitiesTable extends Migration
             $table->bigIncrements('id');
             $table->string('name')->index();
             $table->unsignedBigInteger('region_id')->index();
-            $table->unsignedBigInteger('country_id')->index();
-            $table->decimal('latitude' ,10, 7)->index();
-            $table->decimal('longitude' ,10, 7)->index();
             $table->timestamps();
 
             $table->foreign('region_id')->references('id')->on('regions')->onDelete('cascade');
-            $table->foreign('country_id')->references('id')->on('countries')->onDelete('cascade');
         });
     }
 

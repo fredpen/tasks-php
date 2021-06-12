@@ -12,9 +12,17 @@ class LocationSeeder extends Seeder
 {
     public function run()
     {
-        $path = database_path('seeders/sqls/countries.sql');
-        $sql = file_get_contents($path);
-        DB::unprepared($sql);
+        $countriesPath = database_path('seeders/sqls/countries.sql');
+        $regionsPath = database_path('seeders/sqls/states.sql');
+        $cityPath = database_path('seeders/sqls/cities.sql');
+
+        $countriesSql = file_get_contents($countriesPath);
+        $regionsPath = file_get_contents($regionsPath);
+        $cityPath = file_get_contents($cityPath);
+
+        DB::unprepared($countriesSql);
+        DB::unprepared($regionsPath);
+        // DB::unprepared($cityPath);
 
         // Country::factory()
         //     ->count(10)
