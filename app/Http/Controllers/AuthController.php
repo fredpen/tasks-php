@@ -21,7 +21,7 @@ class AuthController extends Controller
             'phone_number' => ['required', 'int', 'unique:users', 'min:9'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
         ]);
-     
+
         $input = $request->all();
         $input['password'] = bcrypt($input['password']);
         $user = User::create($input);
@@ -79,7 +79,20 @@ class AuthController extends Controller
             return ResponseHelper::badRequest("You can not update $unallowedFields[0]");
         }
 
-        $update = $request->user()->update($request->all());
+        $validatedData = $request->validate([
+            'name' => ['sometimes','required','string', 'min:3'],
+            'title' => ['sometimes','required','string', 'min:3'],
+            'phone_number' => ['sometimes','required', 'numeric'],
+            'country_id' => ['sometimes','required', 'exists:countries,id'],
+            'region_id' => ['sometimes','required', 'exists:regions,id'],
+            'city_id' => ['sometimes','required', 'exists:cities,id'],
+            'address' => ['sometimes','required','string', 'min:3'],
+            "linkedln" => ['sometimes','required', 'string', 'min:3'],
+            "bio" => ['sometimes','required','string', 'min:3'],
+            "email" => ['sometimes','required', 'email', 'unique:']
+        ]);
+
+        $update = $request->user()->update($validatedData);
 
         return $update ? ResponseHelper::sendSuccess([], "Update successful") : ResponseHelper::serverError();
     }
