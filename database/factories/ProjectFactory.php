@@ -26,7 +26,7 @@ class ProjectFactory extends Factory
         return [
             'user_id' => User::inRandomOrder()->first(),
             'model' => $this->faker->randomElement($models),
-            'num_of_taskMaster' => $this->faker->numberBetween(0, 10),
+            'num_of_taskMaster' => $this->faker->numberBetween(1, 10),
             'budget' => $this->faker->randomNumber(5),
             'isActive' => $this->faker->randomElement([0, 1]),
             'status' => $this->faker->randomElement($projectStatus),

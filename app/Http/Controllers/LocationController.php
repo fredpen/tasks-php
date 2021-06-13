@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\City;
 use App\Models\Country;
 use App\Models\Region;
 use App\Helpers\ResponseHelper;
@@ -30,34 +29,46 @@ class LocationController extends Controller
 
     public function regions($countryId)
     {
-        if (Cache::has('regions')) {
-            return ResponseHelper::sendSuccess(Cache::get('regions'));
+        $country = Country::query()->where('id', $countryId);
+        if (!$country->count()) {
+            return ResponseHelper::notFound("Invalid country Id");
         }
 
-        $regions = Region::query()->where('country_id', $countryId);
-        if (!$regions->count()) {
-            return ResponseHelper::notFound();
+        $country = $country->first();
+        if (!$country->regions->count()) {
+            return ResponseHelper::notFound("There is no region under this country");
         }
 
-        $regions = $regions->with('cities')->get();
-        Cache::put('regions', $regions);
+        $cacheName = "regions{$countryId}";
+        if (Cache::has($cacheName)) {
+            return ResponseHelper::sendSuccess(Cache::get($cacheName));
+        }
+
+        $regions = $country->regions;
+        Cache::put($cacheName, $regions);
 
         return ResponseHelper::sendSuccess($regions);
     }
 
     public function cities($regionId)
     {
-        if (Cache::has('cities')) {
-            return ResponseHelper::sendSuccess(Cache::get('cities'));
+        $region = Region::query()->where('id', $regionId);
+        if (!$region->count()) {
+            return ResponseHelper::notFound("Invalid region Id");
         }
 
-        $cities = City::query();
-        if (!$cities->count()) {
-            return ResponseHelper::notFound();
+        $region = $region->first();
+        if (!$region->cities->count()) {
+            return ResponseHelper::notFound("There is no city under this region");
         }
 
-        $cities = $cities->get();
-        Cache::put('cities', $cities);
+        $cacheName = "cities{$regionId}";
+        if (Cache::has($cacheName)) {
+            return ResponseHelper::sendSuccess(Cache::get($cacheName));
+        }
+
+        $cities = $region->cities;
+        Cache::put($cacheName, $cities);
 
         return ResponseHelper::sendSuccess($cities);
     }

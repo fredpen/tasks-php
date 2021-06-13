@@ -1,27 +1,41 @@
 <?php
 
+use App\Http\Controllers\Admin\ProjectApplicationController;
 use Illuminate\Support\Facades\Route;
 
+//acces with api/admin
+
 // Projects
-Route::group(['prefix' => 'project', 'name' => 'project'], function() {
-    
-    Route::get('{draft}', 'ProjectController@fetchProjectWithStatus')->name('draftProjects');
-    Route::get('{posted}', 'ProjectController@fetchProjectWithStatus')->name('postedProjects');
-    Route::get('{started}', 'ProjectController@fetchProjectWithStatus')->name('startedProjects');
-    Route::get('{completed}', 'ProjectController@fetchProjectWithStatus')->name('completedProjects');
-    Route::get('{cancelled}', 'ProjectController@fetchProjectWithStatus')->name('cancelledProjects');
-    Route::get('{deleted}', 'ProjectController@fetchProjectWithStatus')->name('deletedProjects');
-    Route::get('model/{model}', 'ProjectController@fetchProjectWithModel')->name('remote');
-    Route::get('model/{model}', 'ProjectController@fetchProjectWithModel')->name('onsite');
-    Route::get('{userId}/user-projects', 'ProjectController@usersProject')->name('usersProject');
+Route::prefix('project')->group(function () {
+    Route::post('assign',  [ProjectApplicationController::class, 'assign']);
+    Route::post('withdraw_assignment',  [ProjectApplicationController::class, 'withdraw']);
+    Route::get('{project_id}/assigned_users',  [ProjectApplicationController::class, 'assignedUsers']);
+
 });
 
-// Projects assign and reassign
-Route::group(['prefix' => 'project-assignment', 'name' => 'projectAssignment'], function() {
-    
-    Route::get('/assign/{projectId}/{user_id}', 'ProjectAssignmentController@assign')->name('assign');
-    Route::get('/withdrawAssignment/{projectId}/{user_id}', 'ProjectAssignmentController@withdrawAssignment')->name('withdrawAssignment');
-});
+
+
+
+// // Projects
+// Route::group(['prefix' => 'project', 'name' => 'project'], function () {
+
+//     Route::get('{draft}', 'ProjectController@fetchProjectWithStatus')->name('draftProjects');
+//     Route::get('{posted}', 'ProjectController@fetchProjectWithStatus')->name('postedProjects');
+//     Route::get('{started}', 'ProjectController@fetchProjectWithStatus')->name('startedProjects');
+//     Route::get('{completed}', 'ProjectController@fetchProjectWithStatus')->name('completedProjects');
+//     Route::get('{cancelled}', 'ProjectController@fetchProjectWithStatus')->name('cancelledProjects');
+//     Route::get('{deleted}', 'ProjectController@fetchProjectWithStatus')->name('deletedProjects');
+//     Route::get('model/{model}', 'ProjectController@fetchProjectWithModel')->name('remote');
+//     Route::get('model/{model}', 'ProjectController@fetchProjectWithModel')->name('onsite');
+//     Route::get('{userId}/user-projects', 'ProjectController@usersProject')->name('usersProject');
+// });
+
+// // Projects assign and reassign
+// Route::group(['prefix' => 'project-assignment', 'name' => 'projectAssignment'], function () {
+
+//     Route::get('/assign/{projectId}/{user_id}', 'ProjectAssignmentController@assign')->name('assign');
+//     Route::get('/withdrawAssignment/{projectId}/{user_id}', 'ProjectAssignmentController@withdrawAssignment')->name('withdrawAssignment');
+// });
 
 
 
@@ -38,7 +52,7 @@ Route::group(['prefix' => 'project-assignment', 'name' => 'projectAssignment'], 
 //         Route::get('/admin/projects/{project}/adminShow', 'AdminProjectController@adminShow')->name('project.adminShow');
 //         Route::post('/admin/project/assign', 'AdminProjectController@assign')->name('project.assign');
 //         Route::post('/admin/project/reassign', 'AdminProjectController@reassign')->name('project.reassign');
-        
+
 
 //         Route::resources([
 //             'admin/users' => 'AdminUsersController',

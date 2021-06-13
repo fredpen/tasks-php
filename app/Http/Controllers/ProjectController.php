@@ -8,12 +8,39 @@ use App\Models\Project;
 
 class ProjectController extends Controller
 {
+    public function projectAttributes()
+    {
+        $attributes = (new Project())->attributes();
+        return ResponseHelper::sendSuccess($attributes, 'successful');
+    }
+
+    public function favouredAProject(Request $request)
+    {
+        $project = $request->validate(["project_id" => "required|exists:projects,id"]);
+
+        $favoured = $request->user()
+            ->likedProjects()->firstOrCreate($project);
+
+        return $favoured ?
+            ResponseHelper::sendSuccess([], 'successful') : ResponseHelper::serverError();
+    }
+
+    public function favouritesProjects(Request $request)
+    {
+        $projects = $request->user()
+            ->likedProjects()->with(['project.task:name,id', 'project.subtask:name,id', 'project.owner:name,id', 'project.photos:url,project_id']);
+
+        return $projects->count() ?
+            ResponseHelper::sendSuccess($projects->paginate(10), 'successful') : ResponseHelper::serverError();
+    }
+
+
     public function index()
     {
         $projects =  Project::query();
 
         return $projects->count() ?
-            ResponseHelper::sendSuccess($projects->with(['task:name,id', 'subtask:name,id', 'owner:name,id,orders_out,orders_in,ratings', 'country:name,id', 'region:name,id', 'city:name,id'])->paginate(10)) : ResponseHelper::notFound();
+            ResponseHelper::sendSuccess($projects->with(['task:name,id', 'subtask:name,id', 'owner:name,id,orders_out,orders_in,ratings', 'country:name,id', 'region:name,id', 'city:name,id', 'photos:url,project_id'])->paginate(10)) : ResponseHelper::notFound();
     }
 
     public function usersProject(Request $request)
@@ -22,7 +49,7 @@ class ProjectController extends Controller
             ->where('user_id', $request->user()->id);
 
         return $projects->count() ?
-            ResponseHelper::sendSuccess($projects->with(['task:name,id', 'subtask:name,id', 'country:name,id', 'region:name,id', 'city:name,id'])->paginate(10)) : ResponseHelper::notFound();
+            ResponseHelper::sendSuccess($projects->with(['task:name,id', 'subtask:name,id', 'country:name,id', 'region:name,id', 'city:name,id', 'photos:url,project_id'])->paginate(10)) : ResponseHelper::notFound();
     }
 
     public function show($projectId)
@@ -68,7 +95,6 @@ class ProjectController extends Controller
 
     public function update(Request $request)
     {
-
         $this->validateProjectRequest($request);
 
         $project =  Project::query()
@@ -91,7 +117,7 @@ class ProjectController extends Controller
         $request->validate(['project_id' => 'required|integer|exists:projects,id']);
 
         $project =  Project::query()->where('id', $request->project_id);
-        if (! $project->count()) {
+        if (!$project->count()) {
             return ResponseHelper::notFound();
         }
 

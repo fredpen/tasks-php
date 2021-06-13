@@ -6,8 +6,6 @@ use App\Helpers\ResponseHelper;
 use App\Models\Project;
 use App\Models\ProjectApplications;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Validator;
 
 class ProjectApplicationController extends Controller
 {

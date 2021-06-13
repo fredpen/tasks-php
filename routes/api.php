@@ -62,15 +62,19 @@ Route::group(['prefix' => 'project', 'name' => 'project'], function () {
 
     Route::get('all', [ProjectController::class, 'index'])->name('all');
     Route::get('/{projectId}/show', [ProjectController::class, 'show']);
+    Route::get('attributes', [ProjectController::class, 'projectAttributes']);
+
 
     Route::middleware(['auth:sanctum'])->group(function () {
-        Route::get('my_projects', [ProjectController::class, 'usersProject']);
         Route::post('store', [ProjectController::class, 'store']);
+        Route::get('my_projects', [ProjectController::class, 'usersProject']);
+        Route::post('favoured', [ProjectController::class, 'favouredAProject']);
+        Route::get('my_favourites', [ProjectController::class, 'favouritesProjects']);
 
         Route::middleware(['projectAdminRight'])->group(function () {
-            Route::get('publish/{projectId}', [ProjectController::class, 'publish']);
-            Route::delete('delete', [ProjectController::class, 'delete']);
             Route::patch('update', [ProjectController::class, 'update']);
+            Route::delete('delete', [ProjectController::class, 'delete']);
+            Route::get('publish/{projectId}', [ProjectController::class, 'publish']);
         });
     });
 });

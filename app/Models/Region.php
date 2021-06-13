@@ -16,12 +16,10 @@ class Region extends Model
         return $this->belongsTo(Country::class);
     }
 
-
     public function cities()
     {
         return $this->hasMany(City::class);
     }
-
 
     public function user()
     {

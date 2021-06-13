@@ -23,7 +23,7 @@ class CreateProjectsTable extends Migration
                 $table->unsignedBigInteger('user_id')->index();
 
                 $table->tinyInteger('model')->index()->default(1); //ref constants
-                $table->integer('num_of_taskMaster')->index()->default(1);
+                $table->integer('num_of_taskMaster')->default(1);
                 $table->float('budget')->default(0);
                 $table->boolean('isActive')->default(1)->index();
                 $table->tinyInteger('status')->default('0')->index(); //ref constants

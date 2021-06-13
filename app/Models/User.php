@@ -22,6 +22,11 @@ class User extends Authenticatable implements MustVerifyEmail
         'email_verified_at' => 'datetime',
     ];
 
+    public function likedProjects()
+    {
+        return $this->hasMany(FavouredProject::class);
+    }
+
     public function country()
     {
         return $this->belongsTo(Country::class);

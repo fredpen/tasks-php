@@ -27,7 +27,6 @@ return [
         '3' => 'cancelled',
         '4' => 'completed',
         '5' => 'deleted',
-
     ],
 
     // project duration
@@ -56,7 +55,7 @@ return [
         'sub_task_id' => 'sub task id ',
         'country_id' => 'country id ',
         'region_id' => 'region id ',
-        'city_id' => 'city id ',
+        // 'city_id' => 'city id ',
         'model' => 'Projet type(model) ',
         'num_of_taskMaster' => 'Number of task master ',
         'budget' => 'Budget ',

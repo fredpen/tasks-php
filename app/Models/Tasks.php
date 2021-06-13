@@ -11,6 +11,8 @@ class Tasks extends Model
 
     protected $guarded = [];
 
+    protected $hidden = ['created_at', 'updated_at'];
+
     public function subTasks()
     {
         return $this->hasMany(SubTask::class, 'task_id');

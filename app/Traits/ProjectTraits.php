@@ -3,13 +3,21 @@
 namespace App\Traits;
 
 use App\Models\ProjectApplications;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Config;
 
 trait ProjectTraits
 {
-    public function isPublishable()
+    public function isPublishable(): bool
     {
+        if ($this->posted_on) {
+            return "Project is already live";
+        }
+
         $params = Config::get('constants.canPublish');
+        if ($this->model == 1) {
+            $params = Arr::except($params, ['country_id', 'region_id', 'address']);
+        }
 
         foreach ($params as $key => $value) {
             if (!$this->$key) {
@@ -20,22 +28,38 @@ trait ProjectTraits
         return true;
     }
 
-    public function isDeletable()
+    public function isDeletable(): bool
     {
-        return $this->isAssigned() ?
+        return $this->isAssigned(null) ?
             "You can't delete because the project has been assigned" : true;
     }
 
-    public function openForApplications()
+    public function openForApplications(): bool
     {
-        return $this->isAssigned() ? false : true;
+        $applicationLimit = $this->num_of_taskMaster;
+        return $this->isAssigned($applicationLimit) ? false : true;
     }
 
-    public function isAssigned()
+    public function isAssigned($applicationLimit): bool
     {
-        return !!ProjectApplications::query()
+        $numOfApplication = ProjectApplications::query()
             ->where('project_id', $this->id)
             ->where('assigned', true)
             ->count();
+
+        if ($applicationLimit === null && $numOfApplication) {
+            return false;
+        }
+
+        return $numOfApplication >= $applicationLimit;
+    }
+
+    public function attributes(): array
+    {
+        return [
+            "expertise" => Config::get('constants.projectExpertise'),
+            "status" => Config::get('constants.projectStatus'),
+            "model" => Config::get('constants.projectModels'),
+        ];
     }
 }
