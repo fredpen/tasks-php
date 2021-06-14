@@ -60,15 +60,4 @@ class ProjectApplicationController extends Controller
         return $update ?
             ResponseHelper::sendSuccess([], 'Project unassigned') : ResponseHelper::serverError();
     }
-
-
-    public function assignedUsers($projectId)
-    {
-        $projectAssigments = ProjectApplications::query()
-            ->where('project_id', $projectId)
-            ->where('assigned', true);
-
-        return $projectAssigments->count() ?
-            ResponseHelper::sendSuccess($projectAssigments->with('applicants')->paginate(10), 'Project assigned') : ResponseHelper::serverError();
-    }
 }

@@ -63,6 +63,7 @@ Route::group(['prefix' => 'project', 'name' => 'project'], function () {
     Route::get('all', [ProjectController::class, 'index'])->name('all');
     Route::get('/{projectId}/show', [ProjectController::class, 'show']);
     Route::get('attributes', [ProjectController::class, 'projectAttributes']);
+    Route::get('{project_id}/assigned_users',  [ProjectApplicationController::class, 'assignedUsers']);
 
 
     Route::middleware(['auth:sanctum'])->group(function () {
@@ -84,6 +85,7 @@ Route::group(['prefix' => 'project-applications', 'name' => 'project'], function
 
     Route::middleware('auth:sanctum')->group(function () {
         Route::post('/apply',  [ProjectApplicationController::class, 'apply']);
+        Route::post('/accept',  [ProjectApplicationController::class, 'accept']);
         Route::post('/withdraw', [ProjectApplicationController::class, 'withdraw']);
         Route::get('/my-applications', [ProjectApplicationController::class, 'myApplications']);
     });

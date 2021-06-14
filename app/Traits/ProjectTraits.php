@@ -60,6 +60,7 @@ trait ProjectTraits
             "expertise" => Config::get('constants.projectExpertise'),
             "status" => Config::get('constants.projectStatus'),
             "model" => Config::get('constants.projectModels'),
+            "numOfTaskMasters" => Config::get('constants.numOfTaskMasters'),
         ];
     }
 }

@@ -49,6 +49,9 @@ return [
         '5' => 'Veteran'
     ],
 
+    // numOfTaskMasters
+    'numOfTaskMasters' =>  range(1, 10),
+
     // publishable params
     'canPublish' =>  [
         'task_id' => 'task id ',

@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('project')->group(function () {
     Route::post('assign',  [ProjectApplicationController::class, 'assign']);
     Route::post('withdraw_assignment',  [ProjectApplicationController::class, 'withdraw']);
-    Route::get('{project_id}/assigned_users',  [ProjectApplicationController::class, 'assignedUsers']);
+
 
 });
 
@@ -28,13 +28,6 @@ Route::prefix('project')->group(function () {
 //     Route::get('model/{model}', 'ProjectController@fetchProjectWithModel')->name('remote');
 //     Route::get('model/{model}', 'ProjectController@fetchProjectWithModel')->name('onsite');
 //     Route::get('{userId}/user-projects', 'ProjectController@usersProject')->name('usersProject');
-// });
-
-// // Projects assign and reassign
-// Route::group(['prefix' => 'project-assignment', 'name' => 'projectAssignment'], function () {
-
-//     Route::get('/assign/{projectId}/{user_id}', 'ProjectAssignmentController@assign')->name('assign');
-//     Route::get('/withdrawAssignment/{projectId}/{user_id}', 'ProjectAssignmentController@withdrawAssignment')->name('withdrawAssignment');
 // });
 
 

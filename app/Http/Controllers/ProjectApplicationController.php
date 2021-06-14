@@ -9,6 +9,33 @@ use Illuminate\Http\Request;
 
 class ProjectApplicationController extends Controller
 {
+    public function accept(Request $request)
+    {
+        $request->validate([
+            'project_id' => 'required|exists:project_applications'
+        ]);
+
+        $projectAssigment = ProjectApplications::query()
+            ->where('project_id', $request->project_id)
+            ->where('user_id', $request->user()->id)
+            ->where('assigned', true);
+
+        if (!$projectAssigment->count()) {
+            return ResponseHelper::badRequest("Project has not been assigned to you");
+        }
+
+        $projectAssigment = $projectAssigment->where('hasAccepted', false);
+        if (!$projectAssigment->count()) {
+            return ResponseHelper::badRequest("You have already accepted the project");
+        }
+
+        $update = $projectAssigment->update(["hasAccepted" => true]);
+
+        return $update ?
+            ResponseHelper::sendSuccess([], "project accepted") : ResponseHelper::serverError();
+    }
+
+
     public function apply(Request $request)
     {
         $requestData = $request->validate([
@@ -49,6 +76,16 @@ class ProjectApplicationController extends Controller
         $deleteApplication = $projectApplication->delete();
         return $deleteApplication ?
             ResponseHelper::sendSuccess([], "Application withdrawn") : ResponseHelper::serverError();
+    }
+
+    public function assignedUsers($projectId)
+    {
+        $projectAssigments = ProjectApplications::query()
+            ->where('project_id', $projectId)
+            ->where('assigned', true);
+
+        return $projectAssigments->count() ?
+            ResponseHelper::sendSuccess($projectAssigments->with('applicants')->paginate(10)) : ResponseHelper::serverError();
     }
 
     public function applications($projectId)
