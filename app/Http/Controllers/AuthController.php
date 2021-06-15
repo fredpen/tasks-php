@@ -15,7 +15,7 @@ class AuthController extends Controller
     public function signup(Request $request)
     {
         $request->validate([
-            'role_id' => ['required'],
+            // 'role_id' => ['required'],
             'name' => ['required', 'string', 'max:255'],
             'password' => ['required', 'string', 'min:8'],
             'phone_number' => ['required', 'int', 'unique:users', 'min:9'],
@@ -80,17 +80,31 @@ class AuthController extends Controller
         }
 
         $validatedData = $request->validate([
-            'name' => ['sometimes','required','string', 'min:3'],
-            'title' => ['sometimes','required','string', 'min:3'],
-            'phone_number' => ['sometimes','required', 'numeric'],
-            'country_id' => ['sometimes','required', 'exists:countries,id'],
-            'region_id' => ['sometimes','required', 'exists:regions,id'],
-            'city_id' => ['sometimes','required', 'exists:cities,id'],
-            'address' => ['sometimes','required','string', 'min:3'],
-            "linkedln" => ['sometimes','required', 'string', 'min:3'],
-            "bio" => ['sometimes','required','string', 'min:3'],
-            "email" => ['sometimes','required', 'email', 'unique:']
+            'name' => ['sometimes', 'required', 'string', 'min:3'],
+            'title' => ['sometimes', 'required', 'string', 'min:3'],
+            'phone_number' => ['sometimes', 'required', 'numeric'],
+            'country_id' => ['sometimes', 'required', 'exists:countries,id'],
+            'region_id' => ['sometimes', 'required', 'exists:regions,id'],
+            'city_id' => ['sometimes', 'required', 'exists:cities,id'],
+            'address' => ['sometimes', 'required', 'string', 'min:3'],
+            "linkedln" => ['sometimes', 'required', 'string', 'min:3'],
+            "bio" => ['sometimes', 'required', 'string', 'min:3'],
+            "email" => ['sometimes', 'required', 'email', 'unique:'],
+            "avatar" => ['sometimes', 'required', 'image', 'max:2000000'],
+            "identification" => ['sometimes', 'required', 'image', 'max:2000000']
         ]);
+
+        $user = $request->user();
+        $baseUrl = env('APP_URL');
+        if ($request->has('avatar')) {
+            $avatarUrl = $request->file('avatar')->store('avatars');
+            $validatedData['avatar'] = "{$baseUrl}/storage/{$avatarUrl}";
+        }
+
+        if ($request->has('identification')) {
+            $idUrl = $request->file('identification')->store('identifications');
+            $validatedData['identification'] = "{$baseUrl}/storage/{$idUrl}";
+        }
 
         $update = $request->user()->update($validatedData);
 

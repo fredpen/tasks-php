@@ -10,7 +10,9 @@ use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
-    use Notifiable, HasApiTokens, HasFactory;
+    use Notifiable,
+        HasApiTokens,
+        HasFactory;
 
     protected $guarded = [];
 
