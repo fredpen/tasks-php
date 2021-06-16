@@ -87,6 +87,8 @@ class AuthController extends Controller
             'region_id' => ['sometimes', 'required', 'exists:regions,id'],
             'city_id' => ['sometimes', 'required', 'exists:cities,id'],
             'address' => ['sometimes', 'required', 'string', 'min:3'],
+            'security_question' => ['sometimes', 'required', 'string', 'min:3'],
+            'security_answer' => ['sometimes', 'required', 'string', 'min:3'],
             "linkedln" => ['sometimes', 'required', 'string', 'min:3'],
             "bio" => ['sometimes', 'required', 'string', 'min:3'],
             "email" => ['sometimes', 'required', 'email', 'unique:'],

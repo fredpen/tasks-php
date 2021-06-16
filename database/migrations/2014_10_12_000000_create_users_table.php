@@ -33,6 +33,8 @@ class CreateUsersTable extends Migration
                 $table->string('imageurl')->nullable();
                 $table->string('avatar')->nullable();
                 $table->string('identification')->nullable();
+                $table->string('security_question')->nullable();
+                $table->string('security_answer')->nullable();
 
                 $table->integer('ratings')->default(100);
                 $table->string('linkedln')->unique()->nullable();

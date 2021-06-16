@@ -16,7 +16,11 @@ return [
 
     // allowed upload
     'userUpdate' => [
-        'name',  'title',  'phone_number',  'country_id',  'region_id',  'city_id',  'address', "linkedln", "bio", "email", 'avatar', 'identification'
+        'name',  'title',  'phone_number',  'country_id',  'region_id',  'city_id',  'address', "linkedln", "bio", "email", 'avatar', 'identification', 'security_answer', 'security_question'
+    ],
+
+    'userSecurityUpdate' => [
+        'name',  'title',  'phone_number',  'country_id',  'region_id',  'city_id',  'address', "linkedln", "bio", "email", 'avatar', 'identification', 'security_answer', 'security_answer'
     ],
 
     // status
