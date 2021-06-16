@@ -16,7 +16,7 @@ return [
 
     // allowed upload
     'userUpdate' => [
-        'name',  'title',  'phone_number',  'country_id',  'region_id',  'city_id',  'address', "linkedln", "bio", "email", 'avatar', 'identification', 'security_answer', 'security_question'
+        'title', 'country_id',  'region_id',  'city_id',  'address', "linkedln", "bio",  'avatar'
     ],
 
     'userSecurityUpdate' => [

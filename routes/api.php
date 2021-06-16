@@ -6,6 +6,7 @@ use App\Http\Controllers\LocationController;
 use App\Http\Controllers\ProjectApplicationController;
 use App\Http\Controllers\SubTaskController;
 use App\Http\Controllers\TasksController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 // auth
@@ -16,8 +17,17 @@ Route::group(['prefix' => 'auth'], function () {
 
     Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('logout',  [AuthController::class, 'logout']);
-        Route::get('getUser',  [AuthController::class, 'getUser']);
-        Route::post('update-user', [AuthController::class, 'updateUser'])->name('updateUser');
+    });
+});
+
+// user
+Route::group(['prefix' => 'user'], function () {
+
+    Route::middleware(['auth:sanctum'])->group(function () {
+        Route::get('details',  [UserController::class, 'userDetails']);
+        Route::post('update-user', [UserController::class, 'updateUser']);
+        Route::post('update-security-data', [UserController::class, 'updateSecurityData']);
+        Route::post('set-user-security', [UserController::class, 'setSecurity']);
     });
 });
 

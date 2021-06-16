@@ -4,11 +4,9 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 use App\Helpers\ResponseHelper;
 use App\Models\User;
-use Illuminate\Support\Facades\Config;
 
 class AuthController extends Controller
 {
@@ -63,63 +61,5 @@ class AuthController extends Controller
         }
 
         return ResponseHelper::sendSuccess([], "Successfully logged out.");
-    }
-
-    //getuser
-    public function getUser(Request $request)
-    {
-        return ResponseHelper::sendSuccess($request->user());
-    }
-
-    //update User
-    public function updateUser(Request $request)
-    {
-        $unallowedFields = $this->validateUpdateRequest($request->all());
-        if (count($unallowedFields)) {
-            return ResponseHelper::badRequest("You can not update $unallowedFields[0]");
-        }
-
-        $validatedData = $request->validate([
-            'name' => ['sometimes', 'required', 'string', 'min:3'],
-            'title' => ['sometimes', 'required', 'string', 'min:3'],
-            'phone_number' => ['sometimes', 'required', 'numeric'],
-            'country_id' => ['sometimes', 'required', 'exists:countries,id'],
-            'region_id' => ['sometimes', 'required', 'exists:regions,id'],
-            'city_id' => ['sometimes', 'required', 'exists:cities,id'],
-            'address' => ['sometimes', 'required', 'string', 'min:3'],
-            'security_question' => ['sometimes', 'required', 'string', 'min:3'],
-            'security_answer' => ['sometimes', 'required', 'string', 'min:3'],
-            "linkedln" => ['sometimes', 'required', 'string', 'min:3'],
-            "bio" => ['sometimes', 'required', 'string', 'min:3'],
-            "email" => ['sometimes', 'required', 'email', 'unique:'],
-            "avatar" => ['sometimes', 'required', 'image', 'max:2000000'],
-            "identification" => ['sometimes', 'required', 'image', 'max:2000000']
-        ]);
-
-        $user = $request->user();
-        $baseUrl = env('APP_URL');
-        if ($request->has('avatar')) {
-            $avatarUrl = $request->file('avatar')->store('avatars');
-            $validatedData['avatar'] = "{$baseUrl}/storage/{$avatarUrl}";
-        }
-
-        if ($request->has('identification')) {
-            $idUrl = $request->file('identification')->store('identifications');
-            $validatedData['identification'] = "{$baseUrl}/storage/{$idUrl}";
-        }
-
-        $update = $request->user()->update($validatedData);
-
-        return $update ? ResponseHelper::sendSuccess([], "Update successful") : ResponseHelper::serverError();
-    }
-
-    private function validateUpdateRequest($request)
-    {
-        $allowedFields = Config::get('constants.userUpdate');
-        $incomingFields = array_keys($request);
-        $notAllowed = array_filter($incomingFields, function ($incomingField) use ($allowedFields) {
-            return !in_array($incomingField, $allowedFields);
-        });
-        return array_values($notAllowed);
     }
 }

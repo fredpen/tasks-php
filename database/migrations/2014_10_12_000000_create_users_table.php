@@ -34,9 +34,10 @@ class CreateUsersTable extends Migration
                 $table->string('avatar')->nullable();
                 $table->string('identification')->nullable();
                 $table->string('security_question')->nullable();
-                $table->string('security_answer')->nullable();
+                $table->longText('security_answer')->nullable();
 
                 $table->integer('ratings')->default(100);
+                $table->boolean('canApply')->default(false);
                 $table->string('linkedln')->unique()->nullable();
                 $table->longText('bio')->nullable();
                 $table->timestamp('email_verified_at')->nullable();

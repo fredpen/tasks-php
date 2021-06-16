@@ -42,9 +42,14 @@ class ProjectApplicationController extends Controller
             'project_id' => 'required|integer|exists:projects,id',
             'resume' => 'nullable|string',
         ]);
-
         $project = Project::query()->where('id', $request->project_id)->first();
-        $openForApplications = $project->openForApplications();
+
+        $canApply = $request->user()->isProfileCompleted($project);
+        if ($canApply !== true) {
+            return ResponseHelper::unAuthorised("Complete your profile before applying - {$canApply}");
+        }
+
+        return $openForApplications = $project->openForApplications();
         if (!$openForApplications) {
             return ResponseHelper::badRequest("Project has already been assigned");
         }

@@ -10,6 +10,7 @@ class ProjectController extends Controller
 {
     public function projectAttributes()
     {
+        // what is needed to create a project
         $attributes = (new Project())->attributes();
         return ResponseHelper::sendSuccess($attributes, 'successful');
     }

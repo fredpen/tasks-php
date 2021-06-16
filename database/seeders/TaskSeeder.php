@@ -12,7 +12,7 @@ class TaskSeeder extends Seeder
     {
         Tasks::factory()
             ->count(10)
-            ->has(SubTask::factory()->count(5), 'subTasks')
+            ->has(SubTask::factory()->count(10), 'subTasks')
             ->create();
     }
 }

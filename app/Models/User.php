@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\UserTraits;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -11,13 +12,14 @@ use Laravel\Sanctum\HasApiTokens;
 class User extends Authenticatable implements MustVerifyEmail
 {
     use Notifiable,
+        UserTraits,
         HasApiTokens,
         HasFactory;
 
     protected $guarded = [];
 
     protected $hidden = [
-        'password', 'security_answer', 'remember_token',
+        'password', 'security_answer', 'remember_token', 'identification'
     ];
 
     protected $casts = [
@@ -27,6 +29,11 @@ class User extends Authenticatable implements MustVerifyEmail
     public function likedProjects()
     {
         return $this->hasMany(FavouredProject::class);
+    }
+
+    public function skills()
+    {
+        return $this->hasMany(UserSkills::class);
     }
 
     public function country()
@@ -42,16 +49,6 @@ class User extends Authenticatable implements MustVerifyEmail
     public function city()
     {
         return $this->belongsTo(City::class);
-    }
-
-    public function subTasks()
-    {
-        return $this->belongsToMany(SubTask::class, 'user_sub_task');
-    }
-
-    public function tasks()
-    {
-        return $this->belongsToMany(Tasks::class, 'user_tasks', 'user_id', 'task_id');
     }
 
     public function isAdmin()

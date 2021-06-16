@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\User;
+use App\Models\UserSkills;
 use Illuminate\Database\Seeder;
 
 class UserSeeder extends Seeder
@@ -11,6 +12,7 @@ class UserSeeder extends Seeder
     public function run()
     {
         User::factory()
+            ->has(UserSkills::factory()->count(5), 'skills')
             ->count(15)
             ->create();
 
