@@ -16,7 +16,6 @@ class AuthController extends Controller
             // 'role_id' => ['required'],
             'name' => ['required', 'string', 'max:255'],
             'password' => ['required', 'string', 'min:8'],
-            'phone_number' => ['required', 'int', 'unique:users', 'min:9'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
         ]);
 

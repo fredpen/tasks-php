@@ -20,7 +20,7 @@ class CreateUsersTable extends Migration
                 $table->integer('isActive')->index()->default(0); // 0 = incomreg 1 = accountactive 2 = accountdeactivate
                 $table->string('name');
                 $table->string('title')->nullable();
-                $table->string('phone_number')->unique();
+                $table->string('phone_number')->unique()->nullable();
                 $table->unsignedBigInteger('country_id')->nullable();
                 $table->unsignedBigInteger('region_id')->nullable();
                 $table->unsignedBigInteger('city_id')->nullable();

@@ -33,7 +33,7 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function skills()
     {
-        return $this->hasMany(UserSkills::class);
+        return $this->hasManyThrough(SubTask::class, UserSkills::class, 'id');
     }
 
     public function country()

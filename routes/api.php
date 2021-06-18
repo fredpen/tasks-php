@@ -7,6 +7,7 @@ use App\Http\Controllers\ProjectApplicationController;
 use App\Http\Controllers\SubTaskController;
 use App\Http\Controllers\TasksController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\UserSkillsController;
 use Illuminate\Support\Facades\Route;
 
 // auth
@@ -28,6 +29,9 @@ Route::group(['prefix' => 'user'], function () {
         Route::post('update-user', [UserController::class, 'updateUser']);
         Route::post('update-security-data', [UserController::class, 'updateSecurityData']);
         Route::post('set-user-security', [UserController::class, 'setSecurity']);
+
+        Route::post('update-skills', [UserSkillsController::class, 'syncSkills']);
+        Route::get('my-skills', [UserSkillsController::class, 'userSkills']);
     });
 });
 

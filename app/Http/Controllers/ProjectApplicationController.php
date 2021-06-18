@@ -90,7 +90,7 @@ class ProjectApplicationController extends Controller
             ->where('assigned', true);
 
         return $projectAssigments->count() ?
-            ResponseHelper::sendSuccess($projectAssigments->with('applicants')->paginate(10)) : ResponseHelper::serverError();
+            ResponseHelper::sendSuccess($projectAssigments->with('applicants')->paginate(10)) : ResponseHelper::notFound("Users has not been assigned");
     }
 
     public function applications($projectId)

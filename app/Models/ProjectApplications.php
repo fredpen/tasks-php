@@ -24,7 +24,6 @@ class ProjectApplications extends Model
         return $this->belongsTo(Project::class, 'project_id');
     }
 
-
     public static function userAppliedToProject($projectId, $user_id)
     {
         return !!Self::query()
