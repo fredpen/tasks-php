@@ -3,30 +3,64 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\ResponseHelper;
+use App\Models\User;
 use App\Models\UserSkills;
 use Illuminate\Http\Request;
 
 class UserSkillsController extends Controller
 {
+    protected $message = "Skills sync successfully";
+
     public function syncSkills(Request $request)
     {
-        $request->validate(["skillsId" => "required|array"]);
+        $request->validate(["skillsIds" => "required|array|exists:sub_tasks,id"]);
+        $skillObject = [];
+        $requestSkillsID = $request->skillsIds;
 
-        // return $request->skillsId;
-        // return UserSkills::query()
-        // ->where('user_id', $request->user()->id)
-        // ->get();
-        return $update = $request->user()->skills()->create($request->skillsId);
+        // delete what user doesnt want from the old skills/
+        $oldSkills = UserSkills::query()
+            ->where('user_id', $request->user()->id)
+            ->pluck('sub_task_id');
 
-        return $update ?
-            ResponseHelper::sendSuccess([], "Skills sync successfully") : ResponseHelper::serverError();
+        if (!$oldSkills->count()) {
+            $skillsUpdate = $this->createSkillsFromArray($requestSkillsID, $request->user());
+
+            return $skillsUpdate ?
+                ResponseHelper::sendSuccess([], $this->message) : ResponseHelper::serverError();
+        }
+
+        // skills present in old but not in request
+        $unwantedSkillsId = $oldSkills->diff($requestSkillsID)->values();
+        if ($unwantedSkillsId->count()) {
+            UserSkills::query()->whereIn('sub_task_id', $unwantedSkillsId)->delete();
+        }
+
+        // skills present in request but not in old
+        $newSkillsId = collect($requestSkillsID)->diff($oldSkills)->values();
+        if (!$newSkillsId->count()) {
+            return ResponseHelper::sendSuccess([], $this->message);
+        }
+
+        $skillsUpdate = $this->createSkillsFromArray($newSkillsId, $request->user());
+        return $skillsUpdate ?
+            ResponseHelper::sendSuccess([], $this->message) : ResponseHelper::serverError();
     }
 
     public function userSkills(Request $request)
     {
         $skills = $request->user()->skills();
 
-        return $skills ?
-            ResponseHelper::sendSuccess($skills->with('skill')->get()) : ResponseHelper::serverError();
+        return $skills->count() ?
+            ResponseHelper::sendSuccess($skills->with('skill:id,name')->get()) : ResponseHelper::notFound("You do not have any skills at the moment");
+    }
+
+    private function createSkillsFromArray($skillIds, User $user)
+    {
+        foreach ($skillIds as $value) {
+            $skillObject[] = [
+                'sub_task_id' => $value
+            ];
+        }
+        return $user->skills()->createMany($skillObject);
     }
 }

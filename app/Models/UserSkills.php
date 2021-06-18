@@ -25,4 +25,10 @@ class UserSkills extends Model
         return $this->belongsTo(SubTask::class, 'sub_task_id');
     }
 
+    public function addSkills()
+    {
+        return $this->belongsTo(SubTask::class, 'sub_task_id');
+    }
+
+
 }
