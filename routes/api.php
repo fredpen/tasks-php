@@ -70,15 +70,14 @@ Route::group(['prefix' => 'location', 'name' => 'location'], function () {
     Route::get('cities_in_a_region/{regionId}',  [LocationController::class, 'cities']);
 });
 
-
 // Projects
 Route::group(['prefix' => 'project', 'name' => 'project'], function () {
 
-    Route::get('all', [ProjectController::class, 'index'])->name('all');
+    Route::get('all', [ProjectController::class, 'index']);
+    Route::get('search', [ProjectController::class, 'searchProject']);
     Route::get('/{projectId}/show', [ProjectController::class, 'show']);
     Route::get('attributes', [ProjectController::class, 'projectAttributes']);
     Route::get('{project_id}/assigned_users',  [ProjectApplicationController::class, 'assignedUsers']);
-
 
     Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('store', [ProjectController::class, 'store']);

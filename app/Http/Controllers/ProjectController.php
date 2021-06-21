@@ -15,6 +15,62 @@ class ProjectController extends Controller
         return ResponseHelper::sendSuccess($attributes, 'successful');
     }
 
+    public function searchProject(Request $request)
+    {
+        $this->validateSearchRequest($request);
+
+        $projects = Project::query();
+
+        if ($request->model && count($request->model)) {
+            $projects->whereIn('model', $request->model);
+        }
+
+        if ($request->taskIds && count($request->taskIds)) {
+            $projects->whereIn('task_id', $request->taskIds);
+        }
+
+        if ($request->subTaskIds && count($request->taskIds)) {
+            $projects->whereIn('sub_task_id', $request->subTaskIds);
+        }
+
+        if ($request->countryIds && count($request->countryIds)) {
+            $projects->whereIn('country_id', $request->countryIds);
+        }
+
+        if ($request->regionIds && count($request->regionIds)) {
+            $projects->whereIn('region_id', $request->regionIds);
+        }
+
+        if ($request->cityIds && count($request->cityIds)) {
+            $projects->whereIn('city_id', $request->cityIds);
+        }
+
+        if ($request->num_of_taskMaster) {
+            $projects->where('num_of_taskMaster', "<=", $request->num_of_taskMaster);
+        }
+
+        if ($request->experience && count($request->experience)) {
+            $projects->whereIn('experience', $request->experience);
+        }
+
+        if ($request->description) {
+            $description = $request->description;
+            $projects = $projects->where(function ($query) use ($description) {
+                $query->orWhere('description', "like", "%{$description}%")
+                    ->orWhere('address', "like", "%{$description}%")
+                    ->orWhere('title', "like", "%{$description}%");
+            });
+        }
+
+        if (!$projects->count()) {
+            return ResponseHelper::notFound("Query returns empty");
+        }
+
+        $projects = $projects->with(['task:name,id', 'subtask:name,id', 'owner:name,id', 'photos:url,project_id'])->paginate(10);
+
+        return ResponseHelper::sendSuccess($projects, 'successful');
+    }
+
     public function favouredAProject(Request $request)
     {
         $project = $request->validate(["project_id" => "required|exists:projects,id"]);
@@ -71,7 +127,6 @@ class ProjectController extends Controller
         return $project ? ResponseHelper::sendSuccess([]) : ResponseHelper::serverError();
         // $project->owner->notify((new projectCreated));
     }
-
 
     public function publish($projectId)
     {
@@ -150,6 +205,26 @@ class ProjectController extends Controller
             'title' => 'nullable|string',
             'duration' => 'nullable|string',
             'address' => 'nullable|string',
+        ]);
+    }
+
+    private function validateSearchRequest(Request $request)
+    {
+        return $request->validate([
+            'duration' => 'nullable|string',
+            'address' => 'nullable|string',
+            'description' => 'nullable|string',
+            'taskIds' => 'nullable|array|min:1',
+            'subTaskIds' => 'nullable|array|min:1',
+            'countryIds' => 'nullable|array|min:1',
+            'regionIds' => 'nullable|array|min:1',
+            'cityIds' => 'nullable|array|min:1',
+            'model' => 'nullable|array|min:1|max:2',
+            'num_of_taskMaster' => 'nullable|integer|min:1',
+            'experience' =>  'nullable|array|min:1',
+
+            // 'budget' => 'nullable|numeric|min:10',
+            // 'proposed_start_date' => 'nullable|date',
         ]);
     }
 }
