@@ -4,6 +4,7 @@ use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\LocationController;
 use App\Http\Controllers\ProjectApplicationController;
+use App\Http\Controllers\ProjectphotoController;
 use App\Http\Controllers\SubTaskController;
 use App\Http\Controllers\TasksController;
 use App\Http\Controllers\UserController;
@@ -89,6 +90,11 @@ Route::group(['prefix' => 'project', 'name' => 'project'], function () {
             Route::patch('update', [ProjectController::class, 'update']);
             Route::delete('delete', [ProjectController::class, 'delete']);
             Route::get('publish/{projectId}', [ProjectController::class, 'publish']);
+
+            Route::group(['prefix' => 'media'], function () {
+                Route::post('add', [ProjectphotoController::class, 'addMedia']);
+                Route::post('remove', [ProjectphotoController::class, 'removeMedia']);
+            });
         });
     });
 });

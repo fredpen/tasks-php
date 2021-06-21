@@ -115,16 +115,15 @@ class ProjectController extends Controller
             ->where('id', $projectId);
 
         return $projects->count() ?
-            ResponseHelper::sendSuccess($projects->with(['task:name,id', 'subtask:name,id', 'owner:name,id,orders_out,ratings,orders_in', 'country:name,id', 'region:name,id', 'city:name,id', 'photos:url,project_id'])->get()) : ResponseHelper::notFound();
+            ResponseHelper::sendSuccess($projects->with(['task:name,id', 'subtask:name,id', 'owner:name,id,orders_out,ratings,orders_in', 'country:name,id', 'region:name,id', 'city:name,id', 'photos:id,url,project_id'])->get()) : ResponseHelper::notFound();
     }
 
     public function store(Request $request)
     {
         $data = $this->validateProjectRequest($request);
-        $data['user_id'] = $request->user()->id;
-        $project =  Project::create($data);
+        $create = $request->user()->projects()->create($data);
 
-        return $project ? ResponseHelper::sendSuccess([]) : ResponseHelper::serverError();
+        return $create ? ResponseHelper::sendSuccess([]) : ResponseHelper::serverError();
         // $project->owner->notify((new projectCreated));
     }
 
@@ -151,13 +150,12 @@ class ProjectController extends Controller
 
     public function update(Request $request)
     {
+        $request->validate(['project_id' => 'required|exists:projects,id']);
         $this->validateProjectRequest($request);
 
-        $project =  Project::query()
-            ->where('id', $request->project_id);
-
+        $project =  Project::query()->where('id', $request->project_id);
         if (!$project->count()) {
-            return ResponseHelper::notFound();
+            return ResponseHelper::notFound("Invalid Project ID");
         }
 
         $update = $project->update($request->except(['id', 'user_id', 'isActive', 'status', 'posted_on', 'started_on', 'completed_on', 'cancelled_on', 'deleted_on', 'project_id']));
@@ -195,6 +193,7 @@ class ProjectController extends Controller
             'country_id' => 'nullable|integer|exists:countries,id',
             'region_id' => 'nullable|integer|exists:regions,id',
             'city_id' => 'nullable|integer|exists:cities,id',
+
 
             'model' => 'nullable|integer|min:1',
             'num_of_taskMaster' => 'nullable|integer|min:1',

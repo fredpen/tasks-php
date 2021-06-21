@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Config;
 
 trait ProjectTraits
 {
+
     public function isPublishable(): bool
     {
         if ($this->posted_on) {
