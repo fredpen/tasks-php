@@ -42,15 +42,10 @@ class UserController extends Controller
 
         $validatedData = $this->sanitizeRequest($request);
 
-        $baseUrl = Config::get('app.url');
         if ($request->has('avatar')) {
-            $avatarUrl = $request->file('avatar')->store('avatars');
-            $validatedData['avatar'] = "{$baseUrl}/storage/{$avatarUrl}";
-        }
-
-        if ($request->has('identification')) {
-            $idUrl = $request->file('identification')->store('identifications');
-            $validatedData['identification'] = "{$baseUrl}/storage/{$idUrl}";
+            $url =  $request->user()
+                ->storeMyFile($request->file('avatar'), 'avatars', $request->user()->id);
+            $validatedData['avatar'] = $url;
         }
 
         $update = $request->user()->update($validatedData);
@@ -67,10 +62,10 @@ class UserController extends Controller
             return ResponseHelper::badRequest("Incorrect security answer");
         }
 
-        $baseUrl = Config::get('app.url');
         if ($request->has('identification')) {
-            $idUrl = $request->file('identification')->store('identifications');
-            $validatedData['identification'] = "{$baseUrl}/storage/{$idUrl}";
+            $url =  $request->user()
+                ->storeMyFile($request->file('identification'), 'identifications', $request->user()->id);
+            $validatedData['identification'] = $url;
         }
 
         unset($validatedData['security_answer']);

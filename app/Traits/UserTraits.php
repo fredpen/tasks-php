@@ -6,6 +6,18 @@ use Illuminate\Support\Facades\Config;
 
 trait UserTraits
 {
+    public function storeMyFile($requestFile, string $location, int $userId)
+    {
+        $baseUrl = Config::get('app.url');
+        $extension = $requestFile->extension();
+        $randomString = "my{$location}file937840jasiu8ygbcj7383737d{$userId}";
+
+        $fileName = "$randomString.{$extension}";
+        $url =  $requestFile->storeAs($location, $fileName);
+
+        return "{$baseUrl}/storage/{$url}";
+    }
+
     public function isProfileCompleted()
     {
         $params = Config::get('constants.userSecurityUpdate');
