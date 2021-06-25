@@ -66,7 +66,10 @@ class ProjectController extends Controller
             return ResponseHelper::notFound("Query returns empty");
         }
 
-        $projects = $projects->with(['task:name,id', 'subtask:name,id', 'owner:name,id', 'photos:url,project_id'])->paginate(10);
+        $projects = $projects
+            ->with(['task:name,id', 'subtask:name,id', 'owner:name,id', 'photos:url,project_id'])
+            ->orderBy('updated_at', 'desc')
+            ->paginate(10);
 
         return ResponseHelper::sendSuccess($projects, 'successful');
     }
@@ -88,7 +91,9 @@ class ProjectController extends Controller
             ->likedProjects()->with(['project.task:name,id', 'project.subtask:name,id', 'project.owner:name,id', 'project.photos:url,project_id']);
 
         return $projects->count() ?
-            ResponseHelper::sendSuccess($projects->paginate(10), 'successful') : ResponseHelper::serverError();
+            ResponseHelper::sendSuccess($projects
+                ->orderBy('updated_at', 'desc')
+                ->paginate(10), 'successful') : ResponseHelper::serverError();
     }
 
 
@@ -97,7 +102,10 @@ class ProjectController extends Controller
         $projects =  Project::query();
 
         return $projects->count() ?
-            ResponseHelper::sendSuccess($projects->with(['task:name,id', 'subtask:name,id', 'owner:name,id,orders_out,orders_in,ratings', 'country:name,id', 'region:name,id', 'city:name,id', 'photos:url,project_id'])->paginate(10)) : ResponseHelper::notFound();
+            ResponseHelper::sendSuccess($projects
+                ->with(['task:name,id', 'subtask:name,id', 'owner:name,id,orders_out,orders_in,ratings', 'country:name,id', 'region:name,id', 'city:name,id', 'photos:url,project_id'])
+                ->orderBy('updated_at', 'desc')
+                ->paginate(10)) : ResponseHelper::notFound();
     }
 
     public function usersProject(Request $request)
@@ -106,7 +114,10 @@ class ProjectController extends Controller
             ->where('user_id', $request->user()->id);
 
         return $projects->count() ?
-            ResponseHelper::sendSuccess($projects->with(['task:name,id', 'subtask:name,id', 'country:name,id', 'region:name,id', 'city:name,id', 'photos:url,project_id'])->paginate(10)) : ResponseHelper::notFound();
+            ResponseHelper::sendSuccess($projects
+                ->with(['task:name,id', 'subtask:name,id', 'country:name,id', 'region:name,id', 'city:name,id', 'photos:url,project_id'])
+                ->orderBy('updated_at', 'desc')
+                ->paginate(10)) : ResponseHelper::notFound();
     }
 
     public function show($projectId)
