@@ -37,10 +37,10 @@ class ResponseHelper
         return response()->json($response, 400);
     }
 
-    public static function serverError()
+    public static function serverError($message = "Internal server error")
     {
         $response = [
-            'message' => 'Internal server error'
+            'message' => $message
         ];
         return response()->json($response, 500);
     }

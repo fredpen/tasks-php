@@ -131,6 +131,7 @@ class ProjectController extends Controller
 
     public function store(Request $request)
     {
+        $request->validate(['budget' => 'required|numeric|min:10']);
         $data = $this->validateProjectRequest($request);
         $create = $request->user()->projects()->create($data);
 

@@ -2,84 +2,89 @@
 
 namespace App\Http\Controllers;
 
-use App\Payment;
+use App\Exceptions\PaymentException;
+use App\Helpers\PaystackHelper;
+use App\Helpers\ResponseHelper;
+use App\Models\Payment;
+use App\Models\Project;
 use Illuminate\Http\Request;
+
 
 class PaymentController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
+    public $limit = 10;
+
+    public function initiate(Request $request)
+    {
+        $user = $request->user();
+        $project = Project::query()
+            ->where('id', $request->project_id)
+            ->where('user_id', $user->id)->first();
+
+        if ($project->payment()->where('status', 2)->count()) {
+            return ResponseHelper::badRequest('Payment has already been made for this project');
+        }
+
+        try {
+            $paystackData = PaystackHelper::init($project->budget, $user->email);
+        } catch (PaymentException $e) {
+            return ResponseHelper::serverError($e->getMessage());
+        }
+
+        $payment = Payment::create([
+            'user_id' => $user->id,
+            'project_id' => $request->project_id,
+            'amount_paid' => $project->budget,
+            'authorization_url' => $paystackData['authorization_url'],
+            'reference' => $paystackData['reference'],
+            'access_code' => $paystackData['access_code'],
+        ]);
+
+        if (!$payment) {
+            return ResponseHelper::serverError("Could not initiate transaction at this time");
+        }
+
+        return ResponseHelper::sendSuccess(["authorization_url" => $paystackData['authorization_url']]);
+    }
+
+    public function verify(Request $request)
+    {
+        $frontendUrl = "http://tasks.test/front";
+        $reference =  $request->reference;
+
+        try {
+            $payment = Payment::fetchUsingReference($reference);
+            $verification = PaystackHelper::verfiy($reference, $payment->amount);
+            $project = Project::where('id', $payment->project_id)->first();
+            $project->giveValueFor($payment);
+        } catch (PaymentException $e) {
+            return redirect()->away("{$frontendUrl}?status=fail&message={$e->getMessage()}");
+        } catch (\Throwable $e) {
+            return redirect()->away("{$frontendUrl}?status=fail&message={$e->getMessage()}");
+        }
+
+        return $this->successResponse([], "Value has been given");
+    }
+
+    public function userPayments(Request $request)
+    {
+        $payments = $request->user()->payments();
+
+        return $payments->count() ? ResponseHelper::sendSuccess($payments->paginate($this->limit)) : ResponseHelper::notFound("no payments founds");
+    }
+
+
     public function index()
     {
-        //
+        $payments = Payment::query();
+
+        return $payments->count() ? ResponseHelper::sendSuccess($payments->paginate($this->limit)) : ResponseHelper::notFound("no payments founds");
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
+    public function succesfulTransactions()
     {
-        //
-    }
+        $payments = Payment::query()->where('status', 2);
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Payment  $payment
-     * @return \Illuminate\Http\Response
-     */
-    public function show(Payment $payment)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Payment  $payment
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Payment $payment)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Payment  $payment
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, Payment $payment)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Payment  $payment
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(Payment $payment)
-    {
-        //
+        return $payments->count() ? ResponseHelper::sendSuccess($payments->paginate($this->limit)) : ResponseHelper::notFound("no payments founds");
     }
 }

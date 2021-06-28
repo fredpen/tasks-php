@@ -2,6 +2,7 @@
 
 namespace App\Traits;
 
+use App\Models\Project;
 use Illuminate\Support\Facades\Config;
 
 trait UserTraits
@@ -34,5 +35,10 @@ trait UserTraits
         }
 
         return true;
+    }
+
+    public function ownsProject($project_id)
+    {
+        return !!$this->projects->where('id', $project_id)->count();
     }
 }

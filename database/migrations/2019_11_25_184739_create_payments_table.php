@@ -15,17 +15,22 @@ class CreatePaymentsTable extends Migration
     {
         Schema::create('payments', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->integer('status')->default(0)->nullable()->index();
-            $table->string('chargecode');
-            $table->string('paymenttype');
-            $table->string('chargedamount')->index();
-            $table->string('currency')->index();
-            $table->string('merchantfee');
-            $table->string('txref')->index();
-            $table->unsignedBigInteger('txid');
             $table->unsignedBigInteger('user_id')->index();
             $table->unsignedBigInteger('project_id')->index();
+            $table->enum('status', [1, 2])->default(1);  //1 awaiting payment 2 payment successful
+            $table->string('payment_description')->default("awaiting payment");
+
+            // from paystack
+            $table->float('amount_paid', 100, 2);
+            $table->string('authorization_url')->nullable();
+            $table->string('reference')->index();
+            $table->string('access_code')->index()->nullable();
+            $table->longText('payment_details')->nullable();
+
             $table->timestamps();
+            $table->softDeletes();
+            $table->foreign('user_id')->references('id')->on('users');
+            $table->foreign('project_id')->references('id')->on('projects');
         });
     }
 

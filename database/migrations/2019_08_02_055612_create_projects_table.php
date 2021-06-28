@@ -24,24 +24,27 @@ class CreateProjectsTable extends Migration
 
                 $table->tinyInteger('model')->index()->default(1); //ref constants
                 $table->integer('num_of_taskMaster')->default(1);
-                $table->float('budget')->default(0);
-                $table->boolean('isActive')->default(1)->index();
-                $table->tinyInteger('status')->default('0')->index(); //ref constants
-                $table->float('amount_paid')->default(0)->index();
+                $table->boolean('isActive')->default(false);
+                $table->tinyInteger('status')->default('0');//ref constants
                 $table->tinyInteger('experience')->default(1)->index();
+
+                $table->boolean('hasPaid')->default(false);
+                $table->float('amount_paid')->default(0);
+                $table->float('budget')->default(0);
 
                 $table->string('proposed_start_date')->default(now());
                 $table->date('posted_on')->nullable();
                 $table->date('started_on')->nullable();
                 $table->date('completed_on')->nullable();
                 $table->date('cancelled_on')->nullable();
-                $table->softDeletes();
+
 
                 $table->longText('description')->nullable();
                 $table->longText('title')->nullable();
                 $table->longText('address')->nullable();
                 $table->string('duration')->nullable();
                 $table->timestamps();
+                $table->softDeletes();
 
                 $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
                 $table->foreign('task_id')->references('id')->on('tasks');

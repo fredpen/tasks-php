@@ -23,6 +23,11 @@ class Project extends Model
         return $this->belongsTo(Tasks::class, 'task_id');
     }
 
+    public function payment()
+    {
+        return $this->hasOne(Payment::class);
+    }
+
     public function subtask()
     {
         return $this->belongsTo(SubTask::class, 'sub_task_id');

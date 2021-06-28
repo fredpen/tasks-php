@@ -3,6 +3,7 @@
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\LocationController;
+use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProjectApplicationController;
 use App\Http\Controllers\ProjectphotoController;
 use App\Http\Controllers\SubTaskController;
@@ -99,8 +100,25 @@ Route::group(['prefix' => 'project', 'name' => 'project'], function () {
     });
 });
 
+// payments
+Route::group(['prefix' => 'project/payment', 'middleware' => 'auth:sanctum'], function () {
+
+    Route::get('verify', [PaymentController::class, 'verify']);
+
+    Route::middleware(['isAdmin'])->group(function () {
+        Route::get('all_transactions', [PaymentController::class, 'index']);
+        Route::get('successful_transactions', [PaymentController::class, 'succesfulTransactions']);
+    });
+
+
+    Route::middleware(['projectAdminRight'])->group(function () {
+        Route::get('initiate', [PaymentController::class, 'initiate']);
+        Route::get('my-transactions', [PaymentController::class, 'userPayments']);
+    });
+});
+
 // Projects application
-Route::group(['prefix' => 'project-applications', 'name' => 'project'], function () {
+Route::group(['prefix' => 'project-applications'], function () {
 
     Route::middleware('auth:sanctum')->group(function () {
         Route::post('/apply',  [ProjectApplicationController::class, 'apply']);

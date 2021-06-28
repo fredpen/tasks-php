@@ -2,13 +2,14 @@
 
 namespace App\Traits;
 
+use App\Models\Payment;
 use App\Models\ProjectApplications;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\DB;
 
 trait ProjectTraits
 {
-
     public function isPublishable(): bool
     {
         if ($this->posted_on) {
@@ -63,5 +64,21 @@ trait ProjectTraits
             "model" => Config::get('constants.projectModels'),
             "numOfTaskMasters" => Config::get('constants.numOfTaskMasters'),
         ];
+    }
+
+
+    public function giveValueFor(Payment $payment)
+    {
+        return DB::transaction(function () use ($payment) {
+            $payment->update([
+                'status' => 2,
+                'payment_description' => 'payment successful'
+            ]);
+
+            $this->update([
+                'hasPaid' => true,
+                'amount_paid' => $payment->amount_paid
+            ]);
+        }, 2);
     }
 }
