@@ -14,7 +14,7 @@ class UserFactory extends Factory
     public function definition()
     {
         $roles = array_keys(Config::get('constants.roles'));
-        
+
         return [
             'name' => $this->faker->name(),
             'email' => $this->faker->unique()->safeEmail(),
@@ -24,6 +24,13 @@ class UserFactory extends Factory
             'phone_number' =>  $this->faker->phoneNumber,
             'password' => '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', // password
             'remember_token' => Str::random(10),
+            "title" => null,
+            "country_id" => null,
+            "region_id" => null,
+            "city_id" => null,
+            "address" => null,
+            "identification" => null,
+            "identification" => null,
         ];
     }
 

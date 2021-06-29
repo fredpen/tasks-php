@@ -27,13 +27,13 @@ class ProjectApplicationController extends Controller
         $projectApplication = ProjectApplications::query()
             ->where('project_id', $request->project_id)
             ->where('user_id', $request->user_id)
-            ->where('assigned', false);
+            ->where('assigned', null);
 
         if (!$projectApplication->count()) {
             return ResponseHelper::badRequest("Project has already been assigned to you");
         }
 
-        $update = $projectApplication->update(['assigned' => true]);
+        $update = $projectApplication->update(['assigned' => now()]);
 
         return $update ?
             ResponseHelper::sendSuccess([], 'Project assigned') : ResponseHelper::serverError();
@@ -55,7 +55,7 @@ class ProjectApplicationController extends Controller
             return ResponseHelper::badRequest("User is not assigned to the project");
         }
 
-        $update = $projectApplication->update(['assigned' => false]);
+        $update = $projectApplication->update(['assigned' => null]);
 
         return $update ?
             ResponseHelper::sendSuccess([], 'Project unassigned') : ResponseHelper::serverError();

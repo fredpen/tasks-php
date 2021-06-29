@@ -22,16 +22,16 @@ trait UserTraits
     public function isProfileCompleted()
     {
         $params = Config::get('constants.userSecurityUpdate');
-        unset($params['linkedln']);
+        $canSkip = Config::get('constants.canSkipBeforeApplying');
 
         foreach ($params as $key) {
-            if (!$this->$key) {
+            if (!in_array($key, $canSkip) && !$this->$key) {
                 return "{$key} is missing";
             }
         }
 
         if (!$this->skills->count()) {
-            return "Skills is missing";
+            return "You have not defined your Skill set";
         }
 
         return true;

@@ -18,11 +18,14 @@ class CreateProjectApplieduserTable extends Migration
             $table->unsignedBigInteger('project_id')->index();
             $table->unsignedBigInteger('user_id')->index();
             $table->string('resume')->nullable()->index();
-            $table->boolean('assigned')->index()->default(false);
-            $table->boolean('hasAccepted')->index()->default(false);
-            $table->boolean('isCompleted')->index()->default(false);
+            $table->date('assigned')->index()->nullable();
+            $table->date('hasAccepted')->index()->nullable();
+            $table->date('isCompleted_buyer')->index()->nullable();
+            $table->date('isCompleted_seller')->index()->nullable();
             $table->tinyInteger('buyer_rating')->index()->nullable();
             $table->tinyInteger('seller_rating')->index()->nullable();
+            $table->longText('buyer_comment')->nullable();
+            $table->longText('seller_comment')->nullable();
 
             $table->timestamps();
             $table->softDeletes();

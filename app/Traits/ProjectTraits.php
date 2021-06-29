@@ -46,7 +46,7 @@ trait ProjectTraits
     {
         $numOfApplication = ProjectApplications::query()
             ->where('project_id', $this->id)
-            ->where('assigned', true)
+            ->where('assigned', "!=", null)
             ->count();
 
         if ($applicationLimit === null && $numOfApplication) {

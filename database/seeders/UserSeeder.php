@@ -23,7 +23,16 @@ class UserSeeder extends Seeder
                     'name' => "Admin Admin",
                     'email' => "fred@gmail.com",
                     "isActive" => 1,
-                    "role_id" => 0
+                    "role_id" => 0,
+                    "title" => "Software developer",
+                    "country_id" => 1,
+                    "region_id" => 1,
+                    "city_id" => 1,
+                    "bio" => "In all, Know thyself",
+                    "address" => "Lagos Nigeria",
+                    "identification" => "someurl",
+                    "avatar" => "someurl",
+
                 ]
             );
     }

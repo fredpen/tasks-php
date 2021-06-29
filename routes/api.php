@@ -116,6 +116,7 @@ Route::group(['prefix' => 'project/payment', 'middleware' => 'auth:sanctum'], fu
     Route::middleware(['projectAdminRight'])->group(function () {
         Route::get('initiate', [PaymentController::class, 'initiate']);
         Route::get('my-transactions', [PaymentController::class, 'userPayments']);
+        Route::get('my-successful-transactions', [PaymentController::class, 'userSuccesfulPayments']);
     });
 });
 
@@ -130,6 +131,19 @@ Route::group(['prefix' => 'project-applications'], function () {
     });
 
     Route::get('/{projectId}', [ProjectApplicationController::class, 'applications']);
+});
+
+// Projects ratings
+Route::group(['prefix' => 'project/ratings'], function () {
+
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::post('rate',  [ProjectApplicationController::class, 'rate']);
+        // Route::post('/accept',  [ProjectApplicationController::class, 'accept']);
+        // Route::post('/withdraw', [ProjectApplicationController::class, 'withdraw']);
+        // Route::get('/my-applications', [ProjectApplicationController::class, 'myApplications']);
+    });
+
+    // Route::get('/{projectId}', [ProjectApplicationController::class, 'applications']);
 });
 
 

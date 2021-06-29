@@ -20,7 +20,11 @@ return [
     ],
 
     'userSecurityUpdate' => [
-        'name',  'title',  'phone_number',  'country_id',  'region_id',  'city_id',  'address', "linkedln", "bio", "email", 'avatar', 'identification', 'security_answer', 'security_answer'
+        'name',  'title',  'phone_number',  'country_id',  'region_id',  'city_id',  'address', "linkedln", "bio", "email", 'avatar', 'identification', 'security_answer'
+    ],
+
+    'canSkipBeforeApplying' => [
+        'linkedln', 'security_answer'
     ],
 
     // status

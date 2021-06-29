@@ -73,6 +73,18 @@ class PaymentController extends Controller
         return $payments->count() ? ResponseHelper::sendSuccess($payments->paginate($this->limit)) : ResponseHelper::notFound("no payments founds");
     }
 
+    public function userSuccesfulPayments(Request $request)
+    {
+        $payments = $request->user()->payments();
+        if (!$payments->count()) {
+            return ResponseHelper::notFound("no payments founds");
+        }
+
+        $payments->where('status', 2);
+
+        return $payments->count() ? ResponseHelper::sendSuccess($payments->paginate($this->limit)) : ResponseHelper::notFound("no payments founds");
+    }
+
 
     public function index()
     {

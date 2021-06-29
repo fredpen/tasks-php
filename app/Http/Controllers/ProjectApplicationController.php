@@ -9,6 +9,15 @@ use Illuminate\Http\Request;
 
 class ProjectApplicationController extends Controller
 {
+    public function rate(Request $request)
+    {
+        $requestData = $request->validate([
+            'project_id' => 'required|integer|exists:projects,id',
+            'rating' => 'required|string|min:1|max:5',
+            'comment' => 'sometimes|string|min:3|max:200',
+        ]);
+    }
+
     public function accept(Request $request)
     {
         $request->validate([
@@ -18,18 +27,18 @@ class ProjectApplicationController extends Controller
         $projectAssigment = ProjectApplications::query()
             ->where('project_id', $request->project_id)
             ->where('user_id', $request->user()->id)
-            ->where('assigned', true);
+            ->where('assigned', '!=', null);
 
         if (!$projectAssigment->count()) {
             return ResponseHelper::badRequest("Project has not been assigned to you");
         }
 
-        $projectAssigment = $projectAssigment->where('hasAccepted', false);
+        $projectAssigment = $projectAssigment->where('hasAccepted', null);
         if (!$projectAssigment->count()) {
             return ResponseHelper::badRequest("You have already accepted the project");
         }
 
-        $update = $projectAssigment->update(["hasAccepted" => true]);
+        $update = $projectAssigment->update(["hasAccepted" => now()]);
 
         return $update ?
             ResponseHelper::sendSuccess([], "project accepted") : ResponseHelper::serverError();
@@ -49,7 +58,7 @@ class ProjectApplicationController extends Controller
             return ResponseHelper::unAuthorised("Complete your profile before applying - {$canApply}");
         }
 
-        return $openForApplications = $project->openForApplications();
+        $openForApplications = $project->openForApplications();
         if (!$openForApplications) {
             return ResponseHelper::badRequest("Project has already been assigned");
         }
@@ -63,7 +72,7 @@ class ProjectApplicationController extends Controller
         $application = ProjectApplications::create($requestData);
 
         return $application ?
-            ResponseHelper::sendSuccess([], 'Application is successful') : ResponseHelper::serverError();
+            ResponseHelper::sendSuccess([], 'Application is successfull') : ResponseHelper::serverError();
     }
 
     public function withdraw(Request $request)
@@ -87,7 +96,7 @@ class ProjectApplicationController extends Controller
     {
         $projectAssigments = ProjectApplications::query()
             ->where('project_id', $projectId)
-            ->where('assigned', true);
+            ->where('assigned', '!=', null);
 
         return $projectAssigments->count() ?
             ResponseHelper::sendSuccess($projectAssigments->with('applicants')->paginate(10)) : ResponseHelper::notFound("Users has not been assigned");
