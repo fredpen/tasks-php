@@ -43,6 +43,11 @@ class Project extends Model
         return $this->hasMany(Projectphoto::class);
     }
 
+    public function applications()
+    {
+        return $this->hasMany(ProjectApplications::class);
+    }
+
     public function country()
     {
         return $this->belongsTo(Country::class, 'country_id');

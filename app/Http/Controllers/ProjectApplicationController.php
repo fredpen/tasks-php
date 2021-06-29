@@ -5,17 +5,57 @@ namespace App\Http\Controllers;
 use App\Helpers\ResponseHelper;
 use App\Models\Project;
 use App\Models\ProjectApplications;
+use App\Traits\ProjectApplicationTraits;
 use Illuminate\Http\Request;
 
 class ProjectApplicationController extends Controller
 {
+    use ProjectApplicationTraits;
+
     public function rate(Request $request)
     {
         $requestData = $request->validate([
             'project_id' => 'required|integer|exists:projects,id',
-            'rating' => 'required|string|min:1|max:5',
+            'rating' => 'required|integer|min:1|max:5',
             'comment' => 'sometimes|string|min:3|max:200',
         ]);
+
+        // $canRate
+
+        return $request;
+    }
+
+    public function markCompleted(Request $request)
+    {
+        $request->validate(['project_id' => 'required|integer|exists:projects,id']);
+
+        $project = Project::query()
+            ->where('id', $request->project_id)
+            ->where('completed_on', null)
+            ->where('cancelled_on', null);
+
+        if (!$project->count()) {
+            return ResponseHelper::badRequest("project is already completed or canceled");
+        }
+
+        $project = $project->first();
+        $projectApplication = $project->applications()->where('assigned', '!=', null)->first();
+        if (!$projectApplication) {
+            return ResponseHelper::badRequest("Project has not been assigned");
+        }
+
+        if ($project->user_id != $request->user()->id && $projectApplication->user_id != $request->user()->id) {
+            return ResponseHelper::badRequest("You do not own or assigned to this project");
+        }
+
+        if ($project->user_id == $request->user()->id) {
+            $markComplete = $this->ownerMarkProjectComplete($project, $projectApplication);
+        } else {
+            $markComplete = $this->taskMasterProjectComplete($projectApplication);
+        }
+
+        return $markComplete === true ? ResponseHelper::sendSuccess([]) :
+        ResponseHelper::serverError($markComplete);
     }
 
     public function accept(Request $request)

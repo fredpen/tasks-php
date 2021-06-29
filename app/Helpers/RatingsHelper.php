@@ -2,16 +2,12 @@
 
 namespace App\Helpers;
 
+use App\Models\ProjectApplications;
+
 class RatingsHelper
 {
-    public static function sendSuccess($data, $message = "Success")
+    public static function canRate(ProjectApplications $application)
     {
-        $response = [
-            'message' => $message,
-            'data' => $data
-        ];
-        return response()->json($response, 200);
+        
     }
-
-
 }

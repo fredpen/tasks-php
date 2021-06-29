@@ -142,41 +142,17 @@ Route::group(['prefix' => 'project/ratings'], function () {
         // Route::post('/withdraw', [ProjectApplicationController::class, 'withdraw']);
         // Route::get('/my-applications', [ProjectApplicationController::class, 'myApplications']);
     });
-
-    // Route::get('/{projectId}', [ProjectApplicationController::class, 'applications']);
 });
 
 
 // Projects status
-// Route::group(['prefix' => 'update-project-status', 'name' => 'projectStatus'], function () {
+Route::group(['prefix' => 'project/status', 'middleware' => 'auth:sanctum'], function () {
 
-//     Route::get('/{projectId}/{status}', 'ProjectStatusController@updateStatus')->name('update');
-// });
+    Route::get('completed', [ProjectApplicationController::class, 'markCompleted']);
+});
 
-// location controller
-
-
-// Projects assign and application
-// Route::group(['prefix' => 'project-assignment', 'name' => 'projectAssignment'], function () {
-//     Route::get('/assigned-users/{projectId}', 'ProjectAssignmentController@projectAssignedUser')->name('projectAssignedUser');
-//     Route::get('/accept/{projectId}', 'ProjectAssignmentController@accept')->name('accept');
-// });
 
 ///////////////////////////////////////////////////////////////////////
-
-// Route::group(
-//     ['middleware' => ['auth', 'verified', 'isActive']], function () {
-//         Route::resource('project/photos', 'ProjectphotoController');
-//         Route::put('project/ajax/{id}', 'ProjectController@ajax')->name('project.ajax');
-//     }
-// );
-
-
-// // routes for outside users interacting with projects
-// Route::get('/projects/task/{task}/show', 'ProjectshowController@show')->name('project.usershow'); // task show view for users
-// Route::post('/projects/{project}/apply', 'ProjectshowController@apply')->name('project.apply'); // task show view for users
-// Route::get('/project/{projectAssignedUser}/accept', 'ProjectshowController@accept')->name('project.accept');
-
 
 
 

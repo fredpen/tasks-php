@@ -20,8 +20,8 @@ class CreateProjectApplieduserTable extends Migration
             $table->string('resume')->nullable()->index();
             $table->date('assigned')->index()->nullable();
             $table->date('hasAccepted')->index()->nullable();
-            $table->date('isCompleted_buyer')->index()->nullable();
-            $table->date('isCompleted_seller')->index()->nullable();
+            $table->date('isCompleted_owner')->index()->nullable();
+            $table->date('isCompleted_task_master')->index()->nullable();
             $table->tinyInteger('buyer_rating')->index()->nullable();
             $table->tinyInteger('seller_rating')->index()->nullable();
             $table->longText('buyer_comment')->nullable();

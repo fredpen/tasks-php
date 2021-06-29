@@ -32,7 +32,7 @@ class CreateProjectsTable extends Migration
                 $table->float('amount_paid')->default(0);
                 $table->float('budget')->default(0);
 
-                $table->string('proposed_start_date')->default(now());
+            $table->string('proposed_start_date')->default(now());
                 $table->date('posted_on')->nullable();
                 $table->date('started_on')->nullable();
                 $table->date('completed_on')->nullable();
