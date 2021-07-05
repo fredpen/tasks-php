@@ -36,6 +36,12 @@ trait ProjectTraits
             "You can't delete because the project has been assigned" : true;
     }
 
+    public function isCancellable(): bool
+    {
+        return $this->isAssigned(null) ?
+            "You can't cancel because the project has been assigned" : true;
+    }
+
     public function openForApplications(): bool
     {
         $applicationLimit = $this->num_of_taskMaster;
@@ -49,7 +55,7 @@ trait ProjectTraits
             ->where('assigned', "!=", null)
             ->count();
 
-        if ($applicationLimit === null && $numOfApplication) {
+        if ($numOfApplication && $applicationLimit === null) {
             return false;
         }
 

@@ -13,8 +13,8 @@ trait ProjectApplicationTraits
         try {
             return DB::transaction(function () use ($project, $application) {
 
-                $project->update(['completed_on', now()]);
-                $application->update(['isCompleted_owner', now()]);
+                $project->update(['completed_on' => now()]);
+                $application->update(['isCompleted_owner' => now()]);
                 return true;
             }, 2);
         } catch (\Throwable $th) {
@@ -22,13 +22,14 @@ trait ProjectApplicationTraits
         }
     }
 
-
-    public function taskMasterProjectComplete(ProjectApplications $application)
+    
+    public function taskMasterMarksProjectComplete(ProjectApplications $application)
     {
         try {
             return DB::transaction(function () use ($application) {
 
-                return $application->update(['isCompleted_task_master', now()]);
+                 $application->update(['isCompleted_task_master' => now()]);
+                 return true;
             }, 2);
         } catch (\Throwable $th) {
             return $th->getMessage();

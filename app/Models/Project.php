@@ -6,6 +6,7 @@ use App\Traits\ProjectTraits;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Auth;
 
 class Project extends Model
 {
@@ -36,6 +37,11 @@ class Project extends Model
     public function owner()
     {
         return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function isOwner()
+    {
+        return $this->user_id == Auth::id() ? true : false;
     }
 
     public function photos()

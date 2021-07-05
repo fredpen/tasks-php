@@ -96,7 +96,6 @@ class ProjectController extends Controller
                 ->paginate(10), 'successful') : ResponseHelper::serverError();
     }
 
-
     public function index()
     {
         $projects =  Project::query();
@@ -141,16 +140,20 @@ class ProjectController extends Controller
 
     public function publish($projectId)
     {
-        $project =  Project::query()
-            ->where('id', $projectId);
+        $project =  Project::where('id', $projectId);
 
         if (!$project->count()) {
             return ResponseHelper::notFound();
         }
 
-        $publisable = $project->first()->isPublishable();
-        if ($publisable !== true) {
-            return ResponseHelper::badRequest($publisable);
+        $project = $project->first();
+        if ($project->posted_on) {
+            return ResponseHelper::badRequest("Project has already been publish");
+        }
+
+        $errorMessage = $project->isPublishable();
+        if ($errorMessage !== true) {
+            return ResponseHelper::badRequest($errorMessage);
         }
 
         $update = $project->update(['posted_on' => now()]);
@@ -176,6 +179,30 @@ class ProjectController extends Controller
             ResponseHelper::sendSuccess([], 'update successful') : ResponseHelper::serverError();
 
         // $project->owner->notify((new ProjectPosted)->delay(10)->onQueue('notifs'));
+    }
+
+    public function cancel(Request $request)
+    {
+        $request->validate(['project_id' => 'required|integer|exists:projects,id']);
+
+        $project =  Project::query()->where('id', $request->project_id);
+        if (!$project->count()) {
+            return ResponseHelper::notFound();
+        }
+
+        $project = $project->first();
+        if ($project->cancelled_on) {
+            return ResponseHelper::badRequest("Project has already been cancelled");
+        }
+
+        $errorMessage = $project->isCancellable();
+        if ($errorMessage !== true) {
+            return ResponseHelper::badRequest($errorMessage);
+        }
+
+        return $project->update(['cancelled_on' => now()]) ?
+            ResponseHelper::sendSuccess([]) : ResponseHelper::serverError();
+        // $project->owner->notify((new ProjectCancelled)->delay(10));
     }
 
     public function delete(Request $request)

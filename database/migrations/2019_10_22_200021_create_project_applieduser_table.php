@@ -22,10 +22,10 @@ class CreateProjectApplieduserTable extends Migration
             $table->date('hasAccepted')->index()->nullable();
             $table->date('isCompleted_owner')->index()->nullable();
             $table->date('isCompleted_task_master')->index()->nullable();
-            $table->tinyInteger('buyer_rating')->index()->nullable();
-            $table->tinyInteger('seller_rating')->index()->nullable();
-            $table->longText('buyer_comment')->nullable();
-            $table->longText('seller_comment')->nullable();
+            $table->tinyInteger('taskMaster_rating')->index()->nullable();
+            $table->tinyInteger('owner_rating')->index()->nullable();
+            $table->longText('taskMaster_comment')->nullable();
+            $table->longText('owner_comment')->nullable();
 
             $table->timestamps();
             $table->softDeletes();

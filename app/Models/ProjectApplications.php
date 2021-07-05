@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Auth;
 
 class ProjectApplications extends Model
 {
@@ -17,6 +18,11 @@ class ProjectApplications extends Model
     public function applicants()
     {
         return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function isAssignedTaskMaster()
+    {
+        return $this->user_id == Auth::id() ? true : false;
     }
 
     public function projects()

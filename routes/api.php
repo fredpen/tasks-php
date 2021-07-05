@@ -92,6 +92,7 @@ Route::group(['prefix' => 'project', 'name' => 'project'], function () {
         Route::middleware(['projectAdminRight'])->group(function () {
             Route::patch('update', [ProjectController::class, 'update']);
             Route::delete('delete', [ProjectController::class, 'delete']);
+            Route::patch('cancel', [ProjectController::class, 'cancel']);
             Route::get('publish/{projectId}', [ProjectController::class, 'publish']);
 
             Route::group(['prefix' => 'media'], function () {
