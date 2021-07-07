@@ -80,6 +80,7 @@ Route::group(['prefix' => 'location', 'name' => 'location'], function () {
 Route::group(['prefix' => 'project', 'name' => 'project'], function () {
 
     Route::get('all', [ProjectController::class, 'index']);
+    Route::get('active', [ProjectController::class, 'activeProjects']);
     Route::get('search', [ProjectController::class, 'searchProject']);
     Route::get('/{projectId}/show', [ProjectController::class, 'show']);
     Route::get('attributes', [ProjectController::class, 'projectAttributes']);
@@ -107,20 +108,22 @@ Route::group(['prefix' => 'project', 'name' => 'project'], function () {
 });
 
 // payments
-Route::group(['prefix' => 'project/payment', 'middleware' => 'auth:sanctum'], function () {
+Route::group(['prefix' => 'project/payment'], function () {
 
     Route::get('verify', [PaymentController::class, 'verify']);
 
-    Route::middleware(['isAdmin'])->group(function () {
-        Route::get('all_transactions', [PaymentController::class, 'index']);
-        Route::get('successful_transactions', [PaymentController::class, 'succesfulTransactions']);
-    });
+    Route::middleware(['auth:sanctum'])->group(function () {
 
+        Route::middleware(['isAdmin'])->group(function () {
+            Route::get('all_transactions', [PaymentController::class, 'index']);
+            Route::get('successful_transactions', [PaymentController::class, 'succesfulTransactions']);
+        });
 
-    Route::middleware(['projectAdminRight'])->group(function () {
-        Route::get('initiate', [PaymentController::class, 'initiate']);
-        Route::get('my-transactions', [PaymentController::class, 'userPayments']);
-        Route::get('my-successful-transactions', [PaymentController::class, 'userSuccesfulPayments']);
+        Route::middleware(['projectAdminRight'])->group(function () {
+            Route::get('initiate', [PaymentController::class, 'initiate']);
+            Route::get('my-transactions', [PaymentController::class, 'userPayments']);
+            Route::get('my-successful-transactions', [PaymentController::class, 'userSuccesfulPayments']);
+        });
     });
 });
 
@@ -137,14 +140,21 @@ Route::group(['prefix' => 'project-applications'], function () {
     Route::get('/{projectId}', [ProjectApplicationController::class, 'applications']);
 });
 
+// Notifications
+Route::group(['prefix' => 'notification', 'middleware' => 'auth:sanctum'], function () {
+
+    Route::get('all',  [ProjectApplicationController::class, 'all']);
+
+    Route::group(['prefix' => 'admin', 'middleware' => 'isAdmin'], function () {
+        Route::post('rate',  [ProjectApplicationController::class, 'rate']);
+    });
+});
+
 // Projects ratings
 Route::group(['prefix' => 'project/ratings'], function () {
 
     Route::middleware('auth:sanctum')->group(function () {
         Route::post('rate',  [ProjectApplicationController::class, 'rate']);
-
-        // Route::post('/withdraw', [ProjectApplicationController::class, 'withdraw']);
-        // Route::get('/my-applications', [ProjectApplicationController::class, 'myApplications']);
     });
 
     Route::get('user-ratings/{user_id}',  [ProjectApplicationController::class, 'userRatings']);

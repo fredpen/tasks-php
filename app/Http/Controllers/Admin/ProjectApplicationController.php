@@ -24,6 +24,11 @@ class ProjectApplicationController extends Controller
             return ResponseHelper::badRequest("Project has already been assigned");
         }
 
+        $isPaidFor = $project->isPaidFor();
+        if (!$isPaidFor) {
+            return ResponseHelper::badRequest("Project has not been paid for");
+        }
+
         $projectApplication = ProjectApplications::query()
             ->where('project_id', $request->project_id)
             ->where('user_id', $request->user_id)

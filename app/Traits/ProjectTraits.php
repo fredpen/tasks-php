@@ -30,6 +30,11 @@ trait ProjectTraits
         return true;
     }
 
+    public function isPaidFor(): bool
+    {
+        return $this->payment()->where('status', 2)->count() ? true : false;
+    }
+
     public function isDeletable(): bool
     {
         return $this->isAssigned(null) ?

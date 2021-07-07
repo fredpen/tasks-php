@@ -65,14 +65,3 @@ Route::get('/', function () {
 //     }
 // );
 
-// // route group for chnaging status of projects
-// Route::name('project.')->group(function () {
-//     Route::get('projectstatus/{project}/completed', 'ProjectStatusController@completed')->name('complete');
-//     Route::get('projectstatus/{project}/live', 'ProjectStatusController@live')->name('live');
-//     Route::get('projectstatus/{project}/cancelled', 'ProjectStatusController@cancelled')->name('cancel');
-//     Route::get('projectstatus/{project}/posted', 'ProjectStatusController@posted')->name('post');
-// });
-
-// Route::post('/pay', 'RaveController@initialize')->name('pay');
-// Route::post('/rave/callback', 'RaveController@callback')->name('callback');
-// Route::get('/{project}/payment', 'RaveController@payment')->name('payment');

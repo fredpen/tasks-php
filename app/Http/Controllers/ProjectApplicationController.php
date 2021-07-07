@@ -20,7 +20,8 @@ class ProjectApplicationController extends Controller
             ->where('assigned', '!=', null)
             ->where('hasAccepted', '!=', null);
 
-        return $application->count() ? ResponseHelper::sendSuccess($application->first(['taskMaster_rating', 'taskMaster_comment', 'owner_rating', 'owner_comment'])) : ResponseHelper::notFound();
+        return $application->count() ?
+            ResponseHelper::sendSuccess($application->first(['taskMaster_rating', 'taskMaster_comment', 'owner_rating', 'owner_comment'])) : ResponseHelper::notFound();
     }
 
     public function userRatings($user_id)
@@ -31,7 +32,8 @@ class ProjectApplicationController extends Controller
             ->where('assigned', '!=', null)
             ->where('hasAccepted', '!=', null);
 
-        return $application->count() ? ResponseHelper::sendSuccess($application->get(['taskMaster_rating', 'taskMaster_comment', 'owner_rating', 'owner_comment'])) : ResponseHelper::notFound();
+        return $application->count() ?
+            ResponseHelper::sendSuccess($application->get(['taskMaster_rating', 'taskMaster_comment', 'owner_rating', 'owner_comment'])) : ResponseHelper::notFound();
     }
 
     public function rate(Request $request)

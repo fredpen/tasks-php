@@ -16,10 +16,16 @@ class PaymentController extends Controller
 
     public function initiate(Request $request)
     {
+        $request->validate(['project_id' => 'required|exists:projects,id']);
+
         $user = $request->user();
         $project = Project::query()
             ->where('id', $request->project_id)
             ->where('user_id', $user->id)->first();
+
+        if (!$project) {
+            return ResponseHelper::badRequest('Project does not belongs to you');
+        }
 
         if ($project->payment()->where('status', 2)->count()) {
             return ResponseHelper::badRequest('Payment has already been made for this project');
@@ -63,7 +69,7 @@ class PaymentController extends Controller
             return redirect()->away("{$frontendUrl}?status=fail&message={$e->getMessage()}");
         }
 
-        return $this->successResponse([], "Value has been given");
+        return redirect()->away("{$frontendUrl}?status=success");
     }
 
     public function userPayments(Request $request)

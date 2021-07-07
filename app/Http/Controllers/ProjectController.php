@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Helpers\ResponseHelper;
 use App\Models\Project;
+use Illuminate\Support\Facades\Config;
 
 class ProjectController extends Controller
 {
@@ -66,8 +67,9 @@ class ProjectController extends Controller
             return ResponseHelper::notFound("Query returns empty");
         }
 
+        $attributes = Config::get('protectedWith.project');
         $projects = $projects
-            ->with(['task:name,id', 'subtask:name,id', 'owner:name,id', 'photos:url,project_id'])
+            ->with($attributes)
             ->orderBy('updated_at', 'desc')
             ->paginate(10);
 
@@ -86,9 +88,7 @@ class ProjectController extends Controller
             return ResponseHelper::badRequest("You have not favoured this project before");
         }
 
-        $delete = $likedProject->delete();
-
-        return $delete ?
+        return  $likedProject->delete() ?
             ResponseHelper::sendSuccess([], 'successful') : ResponseHelper::serverError();
     }
 
@@ -114,11 +114,12 @@ class ProjectController extends Controller
 
     public function favouritesProjects(Request $request)
     {
-        $projects = $request->user()
-            ->likedProjects()->with(['project.task:name,id', 'project.subtask:name,id', 'project.owner:name,id', 'project.photos:url,project_id']);
+        $projects = $request->user()->likedProjects();
+        $attributes = Config::get('protectedWith.favouredProject');
 
         return $projects->count() ?
             ResponseHelper::sendSuccess($projects
+                ->with($attributes)
                 ->orderBy('updated_at', 'desc')
                 ->paginate(10), 'successful') : ResponseHelper::serverError();
     }
@@ -126,33 +127,48 @@ class ProjectController extends Controller
     public function index()
     {
         $projects =  Project::query();
+        $attributes = Config::get('protectedWith.project');
 
         return $projects->count() ?
             ResponseHelper::sendSuccess($projects
-                ->with(['task:name,id', 'subtask:name,id', 'owner:name,id,orders_out,orders_in,ratings', 'country:name,id', 'region:name,id', 'city:name,id', 'photos:url,project_id'])
+                ->with($attributes)
+                ->orderBy('updated_at', 'desc')
+                ->paginate(10)) : ResponseHelper::notFound();
+    }
+
+    public function activeProjects()
+    {
+        $projects =  Project::query()->where('cancelled_on', null);
+        $attributes = Config::get('protectedWith.project');
+
+        return $projects->count() ?
+            ResponseHelper::sendSuccess($projects
+                ->with($attributes)
                 ->orderBy('updated_at', 'desc')
                 ->paginate(10)) : ResponseHelper::notFound();
     }
 
     public function usersProject(Request $request)
     {
-        $projects =  Project::query()
-            ->where('user_id', $request->user()->id);
+        $projects = $request->user()->projects();
+        $attributes = Config::get('protectedWith.project');
 
         return $projects->count() ?
             ResponseHelper::sendSuccess($projects
-                ->with(['task:name,id', 'subtask:name,id', 'country:name,id', 'region:name,id', 'city:name,id', 'photos:url,project_id'])
+                ->with($attributes)
                 ->orderBy('updated_at', 'desc')
                 ->paginate(10)) : ResponseHelper::notFound();
     }
 
     public function show($projectId)
     {
-        $projects =  Project::query()
-            ->where('id', $projectId);
+        $projects =  Project::query()->where('id', $projectId);
+        $attributes = Config::get('protectedWith.project');
 
         return $projects->count() ?
-            ResponseHelper::sendSuccess($projects->with(['task:name,id', 'subtask:name,id', 'owner:name,id,orders_out,ratings,orders_in', 'country:name,id', 'region:name,id', 'city:name,id', 'photos:id,url,project_id'])->get()) : ResponseHelper::notFound();
+            ResponseHelper::sendSuccess($projects
+                ->with($attributes)
+                ->get()) : ResponseHelper::notFound();
     }
 
     public function store(Request $request)
