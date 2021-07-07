@@ -74,12 +74,39 @@ class ProjectController extends Controller
         return ResponseHelper::sendSuccess($projects, 'successful');
     }
 
+    public function unFavouredAProject(Request $request)
+    {
+        $project = $request->validate(["project_id" => "required|exists:projects,id"]);
+
+        $likedProject = $request->user()
+            ->likedProjects()
+            ->where('project_id', $request->project_id);
+
+        if (!$likedProject->count()) {
+            return ResponseHelper::badRequest("You have not favoured this project before");
+        }
+
+        $delete = $likedProject->delete();
+
+        return $delete ?
+            ResponseHelper::sendSuccess([], 'successful') : ResponseHelper::serverError();
+    }
+
     public function favouredAProject(Request $request)
     {
         $project = $request->validate(["project_id" => "required|exists:projects,id"]);
 
+        $likedProject = $request->user()
+            ->likedProjects()
+            ->where('project_id', $request->project_id);
+
+        if ($likedProject->count()) {
+            return ResponseHelper::badRequest("You have already favoured this project");
+        }
+
         $favoured = $request->user()
-            ->likedProjects()->firstOrCreate($project);
+            ->likedProjects()
+            ->create($project);
 
         return $favoured ?
             ResponseHelper::sendSuccess([], 'successful') : ResponseHelper::serverError();

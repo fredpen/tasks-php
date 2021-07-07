@@ -70,6 +70,8 @@ Route::group(['prefix' => 'subTask', 'name' => 'subTask'], function () {
 // location
 Route::group(['prefix' => 'location', 'name' => 'location'], function () {
     Route::get('countries', [LocationController::class, 'countries']);
+    Route::get('countries-only', [LocationController::class, 'countriesOnly']);
+    Route::get('regions-only', [LocationController::class, 'regionsOnly']);
     Route::get('regions_in_a_country/{countryId}', [LocationController::class, 'regions']);
     Route::get('cities_in_a_region/{regionId}',  [LocationController::class, 'cities']);
 });
@@ -87,6 +89,7 @@ Route::group(['prefix' => 'project', 'name' => 'project'], function () {
         Route::post('store', [ProjectController::class, 'store']);
         Route::get('my_projects', [ProjectController::class, 'usersProject']);
         Route::post('favoured', [ProjectController::class, 'favouredAProject']);
+        Route::post('unfavour', [ProjectController::class, 'unFavouredAProject']);
         Route::get('my_favourites', [ProjectController::class, 'favouritesProjects']);
 
         Route::middleware(['projectAdminRight'])->group(function () {
@@ -139,10 +142,13 @@ Route::group(['prefix' => 'project/ratings'], function () {
 
     Route::middleware('auth:sanctum')->group(function () {
         Route::post('rate',  [ProjectApplicationController::class, 'rate']);
-        // Route::post('/accept',  [ProjectApplicationController::class, 'accept']);
+
         // Route::post('/withdraw', [ProjectApplicationController::class, 'withdraw']);
         // Route::get('/my-applications', [ProjectApplicationController::class, 'myApplications']);
     });
+
+    Route::get('user-ratings/{user_id}',  [ProjectApplicationController::class, 'userRatings']);
+    Route::get('{project_id}',  [ProjectApplicationController::class, 'ratings']);
 });
 
 

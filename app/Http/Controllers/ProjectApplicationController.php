@@ -13,6 +13,27 @@ class ProjectApplicationController extends Controller
 {
     use ProjectApplicationTraits;
 
+    public function ratings($project_id)
+    {
+        $application = ProjectApplications::query()
+            ->where('project_id', $project_id)
+            ->where('assigned', '!=', null)
+            ->where('hasAccepted', '!=', null);
+
+        return $application->count() ? ResponseHelper::sendSuccess($application->first(['taskMaster_rating', 'taskMaster_comment', 'owner_rating', 'owner_comment'])) : ResponseHelper::notFound();
+    }
+
+    public function userRatings($user_id)
+    {
+        // $sellerRatings =
+        $application = ProjectApplications::query()
+            ->where('user_id', $user_id)
+            ->where('assigned', '!=', null)
+            ->where('hasAccepted', '!=', null);
+
+        return $application->count() ? ResponseHelper::sendSuccess($application->get(['taskMaster_rating', 'taskMaster_comment', 'owner_rating', 'owner_comment'])) : ResponseHelper::notFound();
+    }
+
     public function rate(Request $request)
     {
         $request->validate([
@@ -30,26 +51,22 @@ class ProjectApplicationController extends Controller
         }
 
         $project = $project->first();
-        $application = $project->applications()
-            ->where('hasAccepted', '!=', null)
-            ->where('assigned', '!=', null);
-
-        if (!$application->count()) {
-            return ResponseHelper::badRequest("Project has to be marked completed before they can be rated");
+        $application = ProjectApplications::applicationHasBeenAcceptedAndAssigned($project->id);
+        if (!$application) {
+            return ResponseHelper::badRequest("Project has not been assigned or accepted");
         }
 
         $isOwner = $project->isOwner();
-        $application = $application->first();
         $isAssignedTaskMaster = $application->isAssignedTaskMaster();
 
         if (!$isOwner && !$isAssignedTaskMaster) {
             return ResponseHelper::badRequest("You do not own or was assigned to this project");
         }
 
-        $rate = RatingsHelper::rate($application, $isOwner, $request->rating, $request->comment);
+        $rateMessage = RatingsHelper::rate($application, $project, $isOwner, $request->rating, $request->comment);
 
-        return $rate ? ResponseHelper::sendSuccess([]) :
-            ResponseHelper::serverError("Couldnt rate at this time, please try again");
+        return $rateMessage === true ? ResponseHelper::sendSuccess([]) :
+            ResponseHelper::badRequest($rateMessage);
     }
 
     public function markCompleted(Request $request)
@@ -65,30 +82,23 @@ class ProjectApplicationController extends Controller
             return ResponseHelper::badRequest("project is already completed or canceled");
         }
 
-        $projectApplication = $project->applications()
-            ->where('hasAccepted', '!=', null)
-            ->where('assigned', '!=', null);
-
-        if (!$projectApplication->count()) {
+        $project = $project->first();
+        $application = ProjectApplications::applicationHasBeenAcceptedAndAssigned($project->id);
+        if (!$application) {
             return ResponseHelper::badRequest("Project has not been assigned or accepted");
         }
 
-        $project = $project->first();
-        $projectApplication = $projectApplication->first();
+        $isOwner = $project->isOwner();
+        $isAssignedTaskMaster = $application->isAssignedTaskMaster();
 
-        if ($project->user_id != $request->user()->id && $projectApplication->user_id != $request->user()->id) {
+        if (!$isOwner && !$isAssignedTaskMaster) {
             return ResponseHelper::badRequest("You do not own or was assigned to this project");
         }
 
-        $isOwner = $project->isOwner();
-        if ($project->user_id == $request->user()->id) {
-            $markComplete = $this->ownerMarkProjectComplete($project, $projectApplication);
-        } else {
-            $markComplete = $this->taskMasterMarksProjectComplete($projectApplication);
-        }
+        $markComplete = $this->completeProject($project, $application, $isOwner);
 
         return $markComplete === true ? ResponseHelper::sendSuccess([]) :
-            ResponseHelper::serverError($markComplete);
+            ResponseHelper::serverError("Service unavailable");
     }
 
     public function accept(Request $request)

@@ -8,28 +8,17 @@ use Illuminate\Support\Facades\DB;
 
 trait ProjectApplicationTraits
 {
-    public function ownerMarkProjectComplete(Project $project, ProjectApplications $application)
+    public function completeProject(Project $project, ProjectApplications $application, bool $isOwner)
     {
         try {
-            return DB::transaction(function () use ($project, $application) {
+            return DB::transaction(function () use ($project, $application, $isOwner) {
+                $time = now();
+                $completedColumn = $isOwner ? "isCompleted_owner" : "isCompleted_task_master";
+                // $projectCompletedTime = $isOwner ? $time : null;
 
-                $project->update(['completed_on' => now()]);
-                $application->update(['isCompleted_owner' => now()]);
+                $application->update([$completedColumn => $time]);
+                $project->update(['completed_on' => $time]);
                 return true;
-            }, 2);
-        } catch (\Throwable $th) {
-            return $th->getMessage();
-        }
-    }
-
-    
-    public function taskMasterMarksProjectComplete(ProjectApplications $application)
-    {
-        try {
-            return DB::transaction(function () use ($application) {
-
-                 $application->update(['isCompleted_task_master' => now()]);
-                 return true;
             }, 2);
         } catch (\Throwable $th) {
             return $th->getMessage();

@@ -38,13 +38,13 @@ class CreateUsersTable extends Migration
                 $table->longText('access_code')->nullable();
 
                 $table->integer('ratings')->default(5);
-                $table->integer('ratings_count')->default(5);
+                $table->unsignedBigInteger('ratings_count')->default(1);
                 $table->boolean('canApply')->default(false);
                 $table->string('linkedln')->unique()->nullable();
                 $table->longText('bio')->nullable();
                 $table->timestamp('email_verified_at')->nullable();
                 $table->string('password')->nullable();
-                
+
                 $table->rememberToken();
                 $table->timestamps();
             }

@@ -37,4 +37,14 @@ class ProjectApplications extends Model
             ->where("user_id", $user_id)
             ->count();
     }
+
+    public static function applicationHasBeenAcceptedAndAssigned($projectId)
+    {
+        $application = Self::query()
+            ->where("project_id", $projectId)
+            ->where('hasAccepted', '!=', null)
+            ->where('assigned', '!=', null);
+
+        return $application->count() ? $application->first() : false;
+    }
 }
