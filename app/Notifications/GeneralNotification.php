@@ -15,33 +15,40 @@ class GeneralNotification extends Notification
     public $subject;
     public $body;
     public $link;
+    public $sendMail;
 
     public function __construct(
         $subject,
         $body,
         $link,
-        $from
+        $from,
+        $sendMail = false
     ) {
         $this->from = $from;
         $this->subject = $subject;
         $this->body = $body;
         $this->link = $link;
+        $this->sendMail = $sendMail;
     }
 
 
     public function via($notifiable)
     {
-        return ['mail', 'database'];
+        return $this->sendMail ? ['mail', 'database'] : ['database'];
     }
 
     public function toMail($notifiable)
     {
-        return (new MailMessage)
+        return $newMessage = (new MailMessage)
             ->greeting("Hi {$notifiable->name},")
             ->line($this->subject)
-            ->line($this->body)
-            // ->action('Notification Action', url('/'))
-            ->line('Thank you for using our application!');
+            ->line($this->body);
+
+        if ($this->link) {
+            $newMessage->action('Visit here', $this->link);
+        }
+
+        return $newMessage->line('Thank you for using our application!');
     }
 
     public function toArray($notifiable)

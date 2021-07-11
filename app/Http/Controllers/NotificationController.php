@@ -9,11 +9,9 @@ use Illuminate\Http\Request;
 class NotificationController extends Controller
 {
     private $limit = 20;
- 
+
     public function all(Request $request)
     {
-        // return $request->user()->notify(new ProjectAppllication);
-
         $notifications = $request->user()->notifications();
         return $notifications->count() ?
             ResponseHelper::sendSuccess($notifications->simplePaginate($this->limit)) : ResponseHelper::notFound();
