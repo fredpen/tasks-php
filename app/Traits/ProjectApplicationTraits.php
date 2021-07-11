@@ -24,4 +24,21 @@ trait ProjectApplicationTraits
             return $th->getMessage();
         }
     }
+
+
+    public function startProject(Project $project, ProjectApplications $application)
+    {
+        try {
+            return DB::transaction(function () use ($project, $application) {
+
+                $time = now();
+                $application->update(["hasAccepted" => $time]);
+                $project->update(["started_on" => $time]);
+                
+                return true;
+            }, 2);
+        } catch (\Throwable $th) {
+            return $th->getMessage();
+        }
+    }
 }

@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Config;
 
 class ProjectController extends Controller
 {
+    private $Limit = 10;
+
     public function projectAttributes()
     {
         // what is needed to create a project
@@ -71,7 +73,7 @@ class ProjectController extends Controller
         $projects = $projects
             ->with($attributes)
             ->orderBy('updated_at', 'desc')
-            ->paginate(10);
+            ->paginate($this->Limit);
 
         return ResponseHelper::sendSuccess($projects, 'successful');
     }
@@ -112,18 +114,6 @@ class ProjectController extends Controller
             ResponseHelper::sendSuccess([], 'successful') : ResponseHelper::serverError();
     }
 
-    public function favouritesProjects(Request $request)
-    {
-        $projects = $request->user()->likedProjects();
-        $attributes = Config::get('protectedWith.favouredProject');
-
-        return $projects->count() ?
-            ResponseHelper::sendSuccess($projects
-                ->with($attributes)
-                ->orderBy('updated_at', 'desc')
-                ->paginate(10), 'successful') : ResponseHelper::serverError();
-    }
-
     public function index()
     {
         $projects =  Project::query();
@@ -133,7 +123,7 @@ class ProjectController extends Controller
             ResponseHelper::sendSuccess($projects
                 ->with($attributes)
                 ->orderBy('updated_at', 'desc')
-                ->paginate(10)) : ResponseHelper::notFound();
+                ->paginate($this->Limit)) : ResponseHelper::notFound();
     }
 
     public function activeProjects()
@@ -145,20 +135,9 @@ class ProjectController extends Controller
             ResponseHelper::sendSuccess($projects
                 ->with($attributes)
                 ->orderBy('updated_at', 'desc')
-                ->paginate(10)) : ResponseHelper::notFound();
+                ->paginate($this->Limit)) : ResponseHelper::notFound();
     }
 
-    public function usersProject(Request $request)
-    {
-        $projects = $request->user()->projects();
-        $attributes = Config::get('protectedWith.project');
-
-        return $projects->count() ?
-            ResponseHelper::sendSuccess($projects
-                ->with($attributes)
-                ->orderBy('updated_at', 'desc')
-                ->paginate(10)) : ResponseHelper::notFound();
-    }
 
     public function show($projectId)
     {
@@ -307,5 +286,91 @@ class ProjectController extends Controller
             // 'budget' => 'nullable|numeric|min:10',
             // 'proposed_start_date' => 'nullable|date',
         ]);
+    }
+
+    ///usrers
+
+    public function usersProject(Request $request)
+    {
+        $projects = $request->user()->projects();
+        $attributes = Config::get('protectedWith.project');
+
+        return $projects->count() ?
+            ResponseHelper::sendSuccess($projects
+                ->with($attributes)
+                ->orderBy('updated_at', 'desc')
+                ->paginate($this->Limit)) : ResponseHelper::notFound();
+    }
+
+    public function usersDraftProject(Request $request)
+    {
+        $attributes = Config::get('protectedWith.project');
+        $projects = $request->user()
+            ->projects()
+            ->where('posted_on', null);
+
+        return $projects->count() ?
+            ResponseHelper::sendSuccess($projects
+                ->with($attributes)
+                ->orderBy('updated_at', 'desc')
+                ->paginate($this->Limit)) : ResponseHelper::notFound();
+    }
+
+    public function usersCancelProject(Request $request)
+    {
+        $attributes = Config::get('protectedWith.project');
+        $projects = $request->user()
+            ->projects()
+            ->where('cancelled_on', '!=', null);
+
+        return $projects->count() ?
+            ResponseHelper::sendSuccess($projects
+                ->with($attributes)
+                ->orderBy('updated_at', 'desc')
+                ->paginate($this->Limit)) : ResponseHelper::notFound();
+    }
+
+    public function usersCompletedProject(Request $request)
+    {
+        $attributes = Config::get('protectedWith.project');
+        $projects = $request->user()
+            ->projects()
+            ->where('completed_on', '!=', null);
+
+        return $projects->count() ?
+            ResponseHelper::sendSuccess($projects
+                ->with($attributes)
+                ->orderBy('updated_at', 'desc')
+                ->paginate($this->Limit)) : ResponseHelper::notFound();
+    }
+
+
+    public function usersRunningProject(Request $request)
+    {
+        $attributes = Config::get('protectedWith.project');
+        $projects = $request->user()
+            ->projects()
+            ->where('started_on', '!=', null)
+            ->where('cancelled_on', null)
+            ->where('completed_on', null);
+
+        return $projects->count() ?
+            ResponseHelper::sendSuccess($projects
+                ->with($attributes)
+                ->orderBy('updated_at', 'desc')
+                ->paginate($this->Limit)) : ResponseHelper::notFound();
+    }
+
+
+    public function favouritesProjects(Request $request)
+    {
+        $projects = $request->user()->likedProjects();
+        $attributes = Config::get('protectedWith.favouredProject');
+
+        return $projects->count() ?
+            ResponseHelper::sendSuccess($projects
+                ->with($attributes)
+                ->orderBy('updated_at', 'desc')
+                ->paginate($this->Limit)) : ResponseHelper::notFound();
     }
 }

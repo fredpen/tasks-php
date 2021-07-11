@@ -42,8 +42,8 @@ class ProjectApplications extends Model
     {
         $application = Self::query()
             ->where("project_id", $projectId)
-            ->where('hasAccepted', '!=', null)
-            ->where('assigned', '!=', null);
+            ->where('assigned', '!=', null)
+            ->where('hasAccepted', '!=', null);
 
         return $application->count() ? $application->first() : false;
     }

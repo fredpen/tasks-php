@@ -98,6 +98,10 @@ Route::group(['prefix' => 'project', 'name' => 'project'], function () {
     Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('store', [ProjectController::class, 'store']);
         Route::get('my_projects', [ProjectController::class, 'usersProject']);
+        Route::get('my_drafts', [ProjectController::class, 'usersProject']);
+        Route::get('my_cancelled_projects', [ProjectController::class, 'usersCancelProject']);
+        Route::get('my_running_projects', [ProjectController::class, 'usersRunningProject']);
+        Route::get('my_completed_projects', [ProjectController::class, 'usersCompletedProject']);
         Route::post('favoured', [ProjectController::class, 'favouredAProject']);
         Route::post('unfavour', [ProjectController::class, 'unFavouredAProject']);
         Route::get('my_favourites', [ProjectController::class, 'favouritesProjects']);

@@ -105,25 +105,30 @@ class ProjectApplicationController extends Controller
 
     public function accept(Request $request)
     {
+        $project = Project::find($request->project_id);
+        if (!$project) {
+            return ResponseHelper::badRequest("Invalid Project");
+        }
+
         $request->validate([
             'project_id' => 'required|exists:project_applications'
         ]);
 
-        $projectAssigment = ProjectApplications::query()
-            ->where('project_id', $request->project_id)
-            ->where('user_id', $request->user()->id)
-            ->where('assigned', '!=', null);
+        $application = $request->user()
+            ->myApplications()
+            ->where('assigned', '!=', null)
+            ->where('project_id', $request->project_id);
 
-        if (!$projectAssigment->count()) {
+        if (!$application->count()) {
             return ResponseHelper::badRequest("Project has not been assigned to you");
         }
 
-        $projectAssigment = $projectAssigment->where('hasAccepted', null);
-        if (!$projectAssigment->count()) {
+        $application = $application->where('hasAccepted', null);
+        if (!$application->count()) {
             return ResponseHelper::badRequest("You have already accepted the project");
         }
 
-        $update = $projectAssigment->update(["hasAccepted" => now()]);
+        $update = $this->startProject($project, $application->first());
 
         return $update ?
             ResponseHelper::sendSuccess([], "project accepted") : ResponseHelper::serverError();
