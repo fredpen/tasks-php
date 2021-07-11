@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\NotifyHelper;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
@@ -86,6 +87,7 @@ class AuthController extends Controller
         $success['token'] = $token->plainTextToken;
         $success['message'] = "Registration successfull..";
 
+        NotifyHelper::talkTo($user,  "account_creation");
         return ResponseHelper::sendSuccess($success);
     }
 
@@ -104,6 +106,8 @@ class AuthController extends Controller
 
         $user = Auth::user();
         $token = $user->createToken('user')->plainTextToken;
+
+        NotifyHelper::talkTo($user,  "login");
         return ResponseHelper::sendSuccess(['token' => $token], "logged in successfully");
     }
 

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\NotifyHelper;
 use App\Helpers\ResponseHelper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Config;
@@ -49,8 +50,12 @@ class UserController extends Controller
         }
 
         $update = $request->user()->update($validatedData);
+        if (!$update) {
+            return ResponseHelper::serverError();
+        }
 
-        return $update ? ResponseHelper::sendSuccess([], "Update successful") : ResponseHelper::serverError();
+        NotifyHelper::talkTo($request->user(),  "account_update");
+        return ResponseHelper::sendSuccess([], "Update successful");
     }
 
     public function updateSecurityData(Request $request)
@@ -70,8 +75,12 @@ class UserController extends Controller
 
         unset($validatedData['security_answer']);
         $update = $user->update($validatedData);
+        if (!$update) {
+            return ResponseHelper::serverError();
+        }
 
-        return $update ? ResponseHelper::sendSuccess([], "Update successful") : ResponseHelper::serverError();
+        NotifyHelper::talkTo($request->user(),  "account_update");
+        return ResponseHelper::sendSuccess([], "Update successful");
     }
 
     private function validateUpdateRequest($request)

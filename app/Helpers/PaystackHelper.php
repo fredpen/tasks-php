@@ -4,8 +4,6 @@ namespace App\Helpers;
 
 use App\Exceptions\PaymentException;
 use Illuminate\Support\Facades\Config;
-use App\Models\Payment;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 
 class PaystackHelper
