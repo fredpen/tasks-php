@@ -1,12 +1,20 @@
 <?php
 
 use App\Http\Controllers\Admin\ProjectApplicationController;
+use App\Http\Controllers\Admin\ProjectController;
 use Illuminate\Support\Facades\Route;
 
 //acces with api/admin
 
 // Projects
 Route::prefix('project')->group(function () {
+    Route::get('drafts',  [ProjectController::class, 'drafts']);
+    Route::get('published',  [ProjectController::class, 'published']);
+
+});
+
+// Projects applications
+Route::prefix('project-application')->group(function () {
     Route::post('assign',  [ProjectApplicationController::class, 'assign']);
     Route::post('withdraw_assignment',  [ProjectApplicationController::class, 'withdraw']);
 

@@ -18,6 +18,7 @@ class UserSeeder extends Seeder
 
         // admin
         User::factory()
+            ->has(UserSkills::factory()->count(5), 'skills')
             ->create(
                 [
                     'name' => "Admin Admin",
