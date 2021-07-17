@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\ProjectApplicationController;
 use App\Http\Controllers\Admin\ProjectController;
+use App\Http\Controllers\Admin\UsersController;
 use Illuminate\Support\Facades\Route;
 
 //acces with api/admin
@@ -10,35 +11,23 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('project')->group(function () {
     Route::get('drafts',  [ProjectController::class, 'drafts']);
     Route::get('published',  [ProjectController::class, 'published']);
+    Route::get('started',  [ProjectController::class, 'started']);
+    Route::get('completed',  [ProjectController::class, 'completed']);
+    Route::get('cancelled',  [ProjectController::class, 'cancelled']);
+    Route::get('deleted',  [ProjectController::class, 'deleted']);
+    Route::get('user/{user_id}',  [ProjectController::class, 'usersProject']);
+});
 
+// users
+Route::prefix('users')->group(function () {
+    Route::get('all',  [UsersController::class, 'all']);
 });
 
 // Projects applications
 Route::prefix('project-application')->group(function () {
     Route::post('assign',  [ProjectApplicationController::class, 'assign']);
     Route::post('withdraw_assignment',  [ProjectApplicationController::class, 'withdraw']);
-
-
 });
-
-
-
-
-// // Projects
-// Route::group(['prefix' => 'project', 'name' => 'project'], function () {
-
-//     Route::get('{draft}', 'ProjectController@fetchProjectWithStatus')->name('draftProjects');
-//     Route::get('{posted}', 'ProjectController@fetchProjectWithStatus')->name('postedProjects');
-//     Route::get('{started}', 'ProjectController@fetchProjectWithStatus')->name('startedProjects');
-//     Route::get('{completed}', 'ProjectController@fetchProjectWithStatus')->name('completedProjects');
-//     Route::get('{cancelled}', 'ProjectController@fetchProjectWithStatus')->name('cancelledProjects');
-//     Route::get('{deleted}', 'ProjectController@fetchProjectWithStatus')->name('deletedProjects');
-//     Route::get('model/{model}', 'ProjectController@fetchProjectWithModel')->name('remote');
-//     Route::get('model/{model}', 'ProjectController@fetchProjectWithModel')->name('onsite');
-//     Route::get('{userId}/user-projects', 'ProjectController@usersProject')->name('usersProject');
-// });
-
-
 
 
 // Route::group(

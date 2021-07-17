@@ -18,7 +18,7 @@ class TasksController extends Controller
     public function taskWithSubTasks()
     {
         $tasks =  $this->task->with("subTasks:id,task_id,name");
-        return $tasks->count() ? ResponseHelper::sendSuccess($tasks->paginate(20)) : ResponseHelper::notFound();
+        return $tasks->count() ? ResponseHelper::sendSuccess($tasks->get()) : ResponseHelper::notFound();
     }
 
     public function index()
