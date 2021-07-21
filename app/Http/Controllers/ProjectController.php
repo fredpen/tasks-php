@@ -9,7 +9,35 @@ use Illuminate\Support\Facades\Config;
 
 class ProjectController extends Controller
 {
-    private $Limit = 10;
+    private $Limit = 20;
+
+    public function relatedProjects(Request $request)
+    {
+        $project = Project::find($request->project_id);
+        if (!$project) {
+            return ResponseHelper::notFound();
+        }
+
+        $projects = Project::where('id', '!=', $project->id);
+
+        $projects = $projects->where(function ($query) use ($project) {
+            $query->where('task_id', $project->id)
+                ->orWhere('region_id', $project->region_id);
+        });
+
+        if (!$projects->count()) {
+            return ResponseHelper::notFound("Query returns empty");
+        }
+
+        $attributes = Config::get('protectedWith.project');
+        $projects = $projects
+            ->with($attributes)
+            ->orderBy('updated_at', 'desc')
+            ->limit(10)
+            ->get();
+
+        return ResponseHelper::sendSuccess($projects, 'successful');
+    }
 
     public function projectAttributes()
     {
@@ -20,40 +48,20 @@ class ProjectController extends Controller
 
     public function searchProject(Request $request)
     {
-        $this->validateSearchRequest($request);
+        $data = $this->validateSearchRequest($request);
 
         $projects = Project::query();
+        $searchKeys = array_keys($data);
+        $whereInParams = Config::get('constants.whereInSearchQuery');
 
-        if ($request->model && count($request->model)) {
-            $projects->whereIn('model', $request->model);
-        }
-
-        if ($request->taskIds && count($request->taskIds)) {
-            $projects->whereIn('task_id', $request->taskIds);
-        }
-
-        if ($request->subTaskIds && count($request->taskIds)) {
-            $projects->whereIn('sub_task_id', $request->subTaskIds);
-        }
-
-        if ($request->countryIds && count($request->countryIds)) {
-            $projects->whereIn('country_id', $request->countryIds);
-        }
-
-        if ($request->regionIds && count($request->regionIds)) {
-            $projects->whereIn('region_id', $request->regionIds);
-        }
-
-        if ($request->cityIds && count($request->cityIds)) {
-            $projects->whereIn('city_id', $request->cityIds);
+        foreach ($searchKeys as $searchKey) {
+            if (in_array($searchKey, $whereInParams)) {
+                $projects->localWhereIn($searchKey, $request->$searchKey);
+            }
         }
 
         if ($request->num_of_taskMaster) {
             $projects->where('num_of_taskMaster', "<=", $request->num_of_taskMaster);
-        }
-
-        if ($request->experience && count($request->experience)) {
-            $projects->whereIn('experience', $request->experience);
         }
 
         if ($request->description) {
@@ -271,18 +279,18 @@ class ProjectController extends Controller
     private function validateSearchRequest(Request $request)
     {
         return $request->validate([
-            'duration' => 'nullable|string',
-            'address' => 'nullable|string',
-            'description' => 'nullable|string',
-            'taskIds' => 'nullable|array|min:1',
-            'subTaskIds' => 'nullable|array|min:1',
-            'countryIds' => 'nullable|array|min:1',
-            'regionIds' => 'nullable|array|min:1',
-            'cityIds' => 'nullable|array|min:1',
-            'model' => 'nullable|array|min:1|max:2',
-            'num_of_taskMaster' => 'nullable|integer|min:1',
-            'experience' =>  'nullable|array|min:1',
+            'num_of_taskMaster' => 'sometimes|integer|min:1',
+            'address' => 'sometimes|string',
+            'description' => 'sometimes|string',
+            'title' => 'sometimes|string',
 
+            'task_id' => 'sometimes|array|min:1',
+            'sub_task_id' => 'sometimes|array|min:1',
+            'country_id' => 'sometimes|array|min:1',
+            'region_id' => 'sometimes|array|min:1',
+            'city_id' => 'sometimes|array|min:1',
+            'model' => 'sometimes|array|min:1|max:2',
+            'experience' =>  'sometimes|array|min:1',
             // 'budget' => 'nullable|numeric|min:10',
             // 'proposed_start_date' => 'nullable|date',
         ]);

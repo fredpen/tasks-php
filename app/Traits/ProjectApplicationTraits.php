@@ -34,7 +34,7 @@ trait ProjectApplicationTraits
                 $time = now();
                 $application->update(["hasAccepted" => $time]);
                 $project->update(["started_on" => $time]);
-                
+                 
                 return true;
             }, 2);
         } catch (\Throwable $th) {

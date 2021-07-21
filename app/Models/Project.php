@@ -29,6 +29,11 @@ class Project extends Model
         return $this->hasOne(Payment::class);
     }
 
+    public function scopeLocalWhereIn($query, string $columnName, array $keys)
+    {
+        return $query->whereIn($columnName, $keys);
+    }
+
     public function subtask()
     {
         return $this->belongsTo(SubTask::class, 'sub_task_id');

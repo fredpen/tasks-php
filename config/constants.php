@@ -76,5 +76,17 @@ return [
         'title' => 'title ',
         'address' => 'address ',
         'duration' => 'duration '
+    ],
+
+    // searchQuery params using whereIn
+    'whereInSearchQuery' =>  [
+        "task_id",
+        "sub_task_id",
+        "country_id",
+        "region_id",
+        "city_id",
+        "model",
+        "experience"
+
     ]
 ];
