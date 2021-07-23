@@ -38,7 +38,9 @@ class ProjectApplicationController extends Controller
             return ResponseHelper::badRequest("Project has already been assigned to you");
         }
 
-        $update = $projectApplication->update(['assigned' => now()]);
+        $time = now();
+        $update = $projectApplication->update(['assigned' => $time]);
+        $update = $project->update(['assigned_on' => $time]);
 
         return $update ?
             ResponseHelper::sendSuccess([], 'Project assigned') : ResponseHelper::serverError();

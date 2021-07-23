@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Helpers\ResponseHelper;
 use App\Models\Project;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\Config;
 
 class ProjectController extends Controller
@@ -33,10 +34,27 @@ class ProjectController extends Controller
         $projects = $projects
             ->with($attributes)
             ->orderBy('updated_at', 'desc')
-            ->limit(10)
+            ->inRandomOrder()
+            ->take(10)
             ->get();
 
         return ResponseHelper::sendSuccess($projects, 'successful');
+    }
+
+    public function appliableProjects()
+    {
+        $projects =  Project::query()->where('cancelled_on', null)
+            ->where('deleted_at', null)
+            ->where('assigned_on', null)
+            ->where('posted_on', '!=', null);
+
+        $attributes = Config::get('protectedWith.project');
+
+        return $projects->count() ?
+            ResponseHelper::sendSuccess($projects
+                ->with($attributes)
+                ->orderBy('updated_at', 'desc')
+                ->paginate($this->Limit)) : ResponseHelper::notFound();
     }
 
     public function projectAttributes()
@@ -380,5 +398,14 @@ class ProjectController extends Controller
                 ->with($attributes)
                 ->orderBy('updated_at', 'desc')
                 ->paginate($this->Limit)) : ResponseHelper::notFound();
+    }
+
+    public function favouriteProjectsIds(Request $request)
+    {
+        $projects = $request->user()->likedProjects();
+
+        return $projects->count() ?
+            ResponseHelper::sendSuccess($projects
+                ->pluck('id')) : ResponseHelper::notFound();
     }
 }

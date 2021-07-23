@@ -90,6 +90,7 @@ Route::group(['prefix' => 'project', 'name' => 'project'], function () {
 
     Route::get('all', [ProjectController::class, 'index']);
     Route::get('active', [ProjectController::class, 'activeProjects']);
+    Route::get('appliable', [ProjectController::class, 'appliableProjects']);
     Route::get('related-to/{project_id}', [ProjectController::class, 'relatedProjects']);
     Route::get('search', [ProjectController::class, 'searchProject']);
     Route::get('/{projectId}/show', [ProjectController::class, 'show']);
@@ -106,6 +107,7 @@ Route::group(['prefix' => 'project', 'name' => 'project'], function () {
         Route::post('favoured', [ProjectController::class, 'favouredAProject']);
         Route::post('unfavour', [ProjectController::class, 'unFavouredAProject']);
         Route::get('my_favourites', [ProjectController::class, 'favouritesProjects']);
+        Route::get('my_favourite_ids', [ProjectController::class, 'favouriteProjectsIds']);
 
         Route::middleware(['projectAdminRight'])->group(function () {
             Route::patch('update', [ProjectController::class, 'update']);

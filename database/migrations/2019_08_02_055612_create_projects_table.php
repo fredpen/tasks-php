@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+
 class CreateProjectsTable extends Migration
 {
     /**
@@ -13,7 +14,8 @@ class CreateProjectsTable extends Migration
     public function up()
     {
         Schema::create(
-            'projects', function (Blueprint $table) {
+            'projects',
+            function (Blueprint $table) {
                 $table->bigIncrements('id');
                 $table->unsignedBigInteger('task_id')->nullable();
                 $table->unsignedBigInteger('sub_task_id')->nullable();
@@ -25,15 +27,16 @@ class CreateProjectsTable extends Migration
                 $table->tinyInteger('model')->index()->default(1); //ref constants
                 $table->integer('num_of_taskMaster')->default(1);
                 $table->boolean('isActive')->default(false);
-                $table->tinyInteger('status')->default('0');//ref constants
+                $table->tinyInteger('status')->default('0'); //ref constants
                 $table->tinyInteger('experience')->default(1)->index();
 
                 $table->boolean('hasPaid')->default(false);
                 $table->float('amount_paid')->default(0);
                 $table->float('budget')->default(0);
 
-            $table->string('proposed_start_date')->default(now());
+                $table->string('proposed_start_date')->default(now());
                 $table->date('posted_on')->nullable();
+                $table->date('assigned_on')->nullable();
                 $table->date('started_on')->nullable();
                 $table->date('completed_on')->nullable();
                 $table->date('cancelled_on')->nullable();
