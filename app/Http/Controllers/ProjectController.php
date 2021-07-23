@@ -406,6 +406,7 @@ class ProjectController extends Controller
 
         return $projects->count() ?
             ResponseHelper::sendSuccess($projects
-                ->pluck('id')) : ResponseHelper::notFound();
+            ->distinct()
+            ->pluck('project_id')) : ResponseHelper::notFound();
     }
 }
