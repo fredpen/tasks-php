@@ -92,7 +92,7 @@ Route::group(['prefix' => 'project', 'name' => 'project'], function () {
     Route::get('active', [ProjectController::class, 'activeProjects']);
     Route::get('appliable', [ProjectController::class, 'appliableProjects']);
     Route::get('related-to/{project_id}', [ProjectController::class, 'relatedProjects']);
-    Route::get('search', [ProjectController::class, 'searchProject']);
+    Route::post('search', [ProjectController::class, 'searchProject']);
     Route::get('/{projectId}/show', [ProjectController::class, 'show']);
     Route::get('attributes', [ProjectController::class, 'projectAttributes']);
     Route::get('{project_id}/assigned_users',  [ProjectApplicationController::class, 'assignedUsers']);
