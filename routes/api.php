@@ -153,6 +153,7 @@ Route::group(['prefix' => 'project-applications'], function () {
         Route::post('/accept',  [ProjectApplicationController::class, 'accept']);
         Route::post('/withdraw', [ProjectApplicationController::class, 'withdraw']);
         Route::get('/my-applications', [ProjectApplicationController::class, 'myApplications']);
+        Route::get('/my-applicationIds', [ProjectApplicationController::class, 'myApplicationIds']);
     });
 
     Route::get('/{projectId}', [ProjectApplicationController::class, 'applications']);

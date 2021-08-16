@@ -213,4 +213,14 @@ class ProjectApplicationController extends Controller
 
         return $myApplications->with('projects')->paginate(10);
     }
+
+    public function myApplicationIds(Request $request)
+    {
+        $myApplications = $request->user()->myApplications();
+
+        return $myApplications->count() ?
+            ResponseHelper::sendSuccess($myApplications
+                ->distinct()
+                ->pluck('project_id')) : ResponseHelper::notFound();
+    }
 }
