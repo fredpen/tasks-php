@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Helpers\NotifyHelper;
 use App\Helpers\ResponseHelper;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Config;
 
@@ -30,6 +31,20 @@ class UserController extends Controller
     public function userDetails(Request $request)
     {
         return ResponseHelper::sendSuccess($request->user());
+    }
+
+    public function userDetailsWithId($id)
+    {
+        $user = User::where('id', $id);
+        if (!$user->count()) {
+            return ResponseHelper::notFound('User is not available');
+        }
+
+        return ResponseHelper::sendSuccess(
+            $user
+                ->with(['country:id,name', 'region:id,name', 'city:id,name'])
+                ->first(['id', 'title', 'name', 'country_id', 'region_id', 'city_id', 'address', 'email', 'avatar', 'ratings', 'ratings_count', 'bio', 'linkedln'])
+        );
     }
 
     public function updateUser(Request $request)

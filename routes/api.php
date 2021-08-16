@@ -38,6 +38,8 @@ Route::group(['prefix' => 'user'], function () {
         Route::post('update-skills', [UserSkillsController::class, 'syncSkills']);
         Route::get('my-skills', [UserSkillsController::class, 'userSkills']);
     });
+
+    Route::get('{id}/details',  [UserController::class, 'userDetailsWithId']);
 });
 
 // notification
