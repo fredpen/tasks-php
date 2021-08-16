@@ -50,8 +50,16 @@ class UserSkillsController extends Controller
     {
         $skills = $request->user()->skills();
 
-        return $skills->count() ?
-            ResponseHelper::sendSuccess($skills->with('skill:id,name')->get()) : ResponseHelper::notFound("You do not have any skills at the moment");
+        if (!$skills->count()) {
+            return ResponseHelper::notFound("You do not have any skills at the moment");
+        }
+
+        $skills = $skills->with('skill:id,name')->get();
+        $skills = $skills->map(function ($item, $key) {
+            return $item->skill;
+        });
+
+        return ResponseHelper::sendSuccess($skills);
     }
 
     private function createSkillsFromArray($skillIds, User $user)

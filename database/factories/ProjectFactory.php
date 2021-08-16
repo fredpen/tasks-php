@@ -22,6 +22,7 @@ class ProjectFactory extends Factory
         $task = Tasks::inRandomOrder()->first();
         $country = Country::inRandomOrder()->first();
         $region = $country->regions->first();
+        $timeSlots = [now(), null, now()];
 
         return [
             'user_id' => User::inRandomOrder()->first(),
@@ -32,10 +33,10 @@ class ProjectFactory extends Factory
             'status' => $this->faker->randomElement($projectStatus),
             'amount_paid' => $this->faker->randomNumber(5),
             'experience' => $this->faker->randomElement($projectExpertise),
-            'posted_on' => $this->faker->randomElement([now(), null]),
-            'started_on' => $this->faker->randomElement([now(), null]),
-            'completed_on' => $this->faker->randomElement([now(), null]),
-            'cancelled_on' => $this->faker->randomElement([now(), null]),
+            'posted_on' => $this->faker->randomElement($timeSlots),
+            'started_on' => $this->faker->randomElement($timeSlots),
+            'completed_on' => $this->faker->randomElement($timeSlots),
+            'cancelled_on' => $this->faker->randomElement($timeSlots),
             'description' =>  $this->faker->paragraph(2),
             'title' =>  $this->faker->sentence(),
             'task_id' =>  $task,

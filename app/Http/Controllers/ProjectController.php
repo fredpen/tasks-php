@@ -36,7 +36,7 @@ class ProjectController extends Controller
             ->with($attributes)
             ->orderBy('updated_at', 'desc')
             ->inRandomOrder()
-            ->take(10)
+            ->take(4)
             ->get();
 
         return ResponseHelper::sendSuccess($projects, 'successful');
