@@ -16,14 +16,15 @@ class ProjectController extends Controller
     {
         $project = Project::find($request->project_id);
         if (!$project) {
-            return ResponseHelper::notFound();
+            return ResponseHelper::notFound('Invalid project Id');
         }
 
         $projects = Project::where('id', '!=', $project->id);
 
         $projects = $projects->where(function ($query) use ($project) {
             $query->where('task_id', $project->id)
-                ->orWhere('region_id', $project->region_id);
+                ->orWhere('region_id', $project->region_id)
+                ->orWhere('model', $project->model);
         });
 
         if (!$projects->count()) {
@@ -406,7 +407,7 @@ class ProjectController extends Controller
 
         return $projects->count() ?
             ResponseHelper::sendSuccess($projects
-            ->distinct()
-            ->pluck('project_id')) : ResponseHelper::notFound();
+                ->distinct()
+                ->pluck('project_id')) : ResponseHelper::notFound();
     }
 }
