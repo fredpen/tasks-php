@@ -45,7 +45,7 @@ Route::group(['prefix' => 'user'], function () {
 // notification
 Route::group(['prefix' => 'notifications', 'middleware' => 'auth:sanctum'], function () {
 
-    Route::get('alldd', [NotificationController::class, 'all']);
+    Route::get('all', [NotificationController::class, 'all']);
     Route::get('unread', [NotificationController::class, 'unread']);
     Route::post('delete', [NotificationController::class, 'delete']);
     Route::post('mark-as-read', [NotificationController::class, 'markAsRead']);
