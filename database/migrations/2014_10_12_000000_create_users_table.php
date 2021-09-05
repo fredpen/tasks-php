@@ -26,7 +26,7 @@ class CreateUsersTable extends Migration
                 $table->unsignedBigInteger('city_id')->nullable();
 
                 $table->longText('address')->nullable();
-                $table->string('revenue')->nullable();
+                $table->float('revenue')->nullable();
                 $table->integer('orders_out')->default(0);
                 $table->integer('orders_in')->default(0);
                 $table->string('email')->unique();

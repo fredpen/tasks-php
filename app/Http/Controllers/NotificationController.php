@@ -14,7 +14,7 @@ class NotificationController extends Controller
     {
         $notifications = $request->user()->notifications();
         return $notifications->count() ?
-            ResponseHelper::sendSuccess($notifications->simplePaginate($this->limit)) : ResponseHelper::notFound();
+            ResponseHelper::sendSuccess($notifications->paginate($this->limit)) : ResponseHelper::notFound();
     }
 
     public function unread(Request $request)
@@ -53,5 +53,14 @@ class NotificationController extends Controller
 
         return $notifications->update(['read_at' => now()]) ?
             ResponseHelper::sendSuccess([]) : ResponseHelper::notFound();
+    }
+
+    public function markAllAsRead(Request $request)
+    {
+        $request->user()
+            ->unreadNotifications
+            ->markAsRead();
+
+        return ResponseHelper::sendSuccess([]);
     }
 }
