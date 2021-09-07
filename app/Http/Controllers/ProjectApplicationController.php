@@ -211,6 +211,10 @@ class ProjectApplicationController extends Controller
             return ResponseHelper::notFound("user doesn't have applications yet");
         }
 
+        if ($request->status === "completed") {
+           $myApplications = $myApplications->where('isCompleted_owner', '!=', null)->orWhere('isCompleted_task_master', '!=', null);
+        }
+        
         return $myApplications->with('projects')->paginate(10);
     }
 
