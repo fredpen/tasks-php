@@ -359,13 +359,17 @@ class ProjectController extends Controller
 
     public function usersCompletedProject(Request $request)
     {
-        $attributes = Config::get('protectedWith.project');
+         $attributes = Config::get('protectedWith.project');
         $projects = $request->user()
             ->projects()
             ->where('completed_on', '!=', null);
 
         return $projects->count() ?
             ResponseHelper::sendSuccess($projects
+                ->with(['applications' => function ($query) {
+                    $query->where('assigned', '!=', null)
+                        ->where('hasAccepted', '!=', null);
+                }])
                 ->with($attributes)
                 ->orderBy('updated_at', 'desc')
                 ->paginate($this->Limit)) : ResponseHelper::notFound();
