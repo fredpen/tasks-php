@@ -215,7 +215,7 @@ class ProjectApplicationController extends Controller
            $myApplications = $myApplications->where('isCompleted_owner', '!=', null)->orWhere('isCompleted_task_master', '!=', null);
         }
         
-        return $myApplications->with('projects')->paginate(10);
+        return $myApplications->with('projects.owner:name,ratings,ratings_count,id')->paginate(10);
     }
 
     public function myApplicationIds(Request $request)
