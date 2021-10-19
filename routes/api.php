@@ -139,7 +139,7 @@ Route::group(['prefix' => 'project/payment'], function () {
         });
 
         Route::middleware(['projectAdminRight'])->group(function () {
-            Route::get('initiate', [PaymentController::class, 'initiate']);
+            Route::post('initiate', [PaymentController::class, 'initiate']);
             Route::get('my-transactions', [PaymentController::class, 'userPayments']);
             Route::get('my-successful-transactions', [PaymentController::class, 'userSuccesfulPayments']);
         });
