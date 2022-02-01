@@ -28,7 +28,7 @@ class ProjectController extends Controller
         });
 
         if (!$projects->count()) {
-            return ResponseHelper::notFound("Query returns empty");
+            return ResponseHelper::sendSuccess([]);
         }
 
         $attributes = Config::get('protectedWith.project');
@@ -44,7 +44,8 @@ class ProjectController extends Controller
 
     public function appliableProjects()
     {
-        $projects =  Project::query()->where('cancelled_on', null)
+        $projects =  Project::query()
+            ->where('cancelled_on', null)
             ->where('deleted_at', null)
             ->where('assigned_on', null)
             ->where('posted_on', '!=', null);
@@ -54,7 +55,7 @@ class ProjectController extends Controller
         return $projects->count() ?
             ResponseHelper::sendSuccess($projects
                 ->with($attributes)
-                ->orderBy('updated_at', 'desc')
+                ->latest()
                 ->paginate($this->Limit)) : ResponseHelper::notFound();
     }
 
@@ -180,7 +181,7 @@ class ProjectController extends Controller
     public function store(Request $request)
     {
         $request->validate(['budget' => 'required|numeric|min:10']);
-        $data = $this->validateProjectRequest($request);
+        $data = $this->validateProjectCreateRequest($request);
         $create = $request->user()->projects()->create($data);
 
         return $create ? ResponseHelper::sendSuccess([]) : ResponseHelper::serverError();
@@ -189,33 +190,27 @@ class ProjectController extends Controller
 
     public function publish($projectId)
     {
-        $project =  Project::where('id', $projectId);
+        $project =  Project::find($projectId);
 
-        if (!$project->count()) {
+        if (!$project) {
             return ResponseHelper::notFound();
         }
 
-        $project = $project->first();
-        if ($project->posted_on) {
-            return ResponseHelper::badRequest("Project has already been publish");
+        try {
+            $project->isPublishable();
+            $project->update(['posted_on' => now()]);
+            return ResponseHelper::sendSuccess([], 'Project is now live');
+        } catch (\Throwable $th) {
+            return ResponseHelper::badRequest($th->getMessage());
         }
 
-        $errorMessage = $project->isPublishable();
-        if ($errorMessage !== true) {
-            return ResponseHelper::badRequest($errorMessage);
-        }
-
-        $update = $project->update(['posted_on' => now()]);
-        return $update ?
-            ResponseHelper::sendSuccess([], 'Project is now live') : ResponseHelper::serverError();
-
-        // $project->owner->notify((new ProjectPosted)->delay(10)->onQueue('notifs'));
+        // return $project->owner->notify((new ProjectPosted)->delay(10)->onQueue('notifs'));
     }
 
     public function update(Request $request)
     {
         $request->validate(['project_id' => 'required|exists:projects,id']);
-        $this->validateProjectRequest($request);
+        $this->validateProjectUpdateRequest($request);
 
         $project =  Project::query()->where('id', $request->project_id);
         if (!$project->count()) {
@@ -273,8 +268,33 @@ class ProjectController extends Controller
         // $project->owner->notify((new ProjectCancelled)->delay(10));
     }
 
-    private function validateProjectRequest($request)
+    private function validateProjectCreateRequest($request)
     {
+        $todayDate = date('d/m/Y');
+
+        return $request->validate([
+            'task_id' => 'required|integer|exists:tasks,id',
+            'sub_task_id' => 'required|integer|exists:sub_tasks,id',
+            'country_id' => 'exclude_if:model,1|integer|exists:countries,id',
+            'region_id' => 'exclude_if:model,1|integer|exists:regions,id',
+            'city_id' => 'exclude_if:model,1|integer|exists:cities,id',
+
+            'model' => 'required|integer|min:1|max:2',
+            'num_of_taskMaster' => 'required|integer|min:1|max:10',
+            'budget' => 'required|numeric|min:1000',
+            'experience' => 'required|integer|min:1|max:5',
+            'proposed_start_date' =>  "required|date_format:d/m/Y|after_or_equal:'.$todayDate'",
+            'description' => 'required|string|min:20',
+            'title' => 'required|string|min:10',
+            'duration' => 'required|string',
+            'address' => 'exclude_if:model,1|string|min:10',
+        ]);
+    }
+
+    private function validateProjectUpdateRequest($request)
+    {
+        $todayDate = date('d/m/Y');
+
         return $request->validate([
             'task_id' => 'nullable|integer|exists:tasks,id',
             'sub_task_id' => 'nullable|integer|exists:sub_tasks,id',
@@ -282,16 +302,15 @@ class ProjectController extends Controller
             'region_id' => 'nullable|integer|exists:regions,id',
             'city_id' => 'nullable|integer|exists:cities,id',
 
-
-            'model' => 'nullable|integer|min:1',
-            'num_of_taskMaster' => 'nullable|integer|min:1',
-            'budget' => 'nullable|numeric|min:10',
-            'experience' => 'nullable|integer',
-            'proposed_start_date' => 'nullable|date',
+            'model' => 'nullable|integer|min:1|max:2',
+            'num_of_taskMaster' => 'nullable|integer|min:1|max:10',
+            'budget' => 'nullable|numeric|min:1000',
+            'experience' => 'nullable|integer|min:1|max:5',
+            'proposed_start_date' =>  "nullable|date_format:d/m/Y|after_or_equal:'.$todayDate'",
             'description' => 'nullable|string',
-            'title' => 'nullable|string',
+            'title' => 'nullable|string|min:10',
             'duration' => 'nullable|string',
-            'address' => 'nullable|string',
+            'address' => 'nullable|string|min:10',
         ]);
     }
 
@@ -359,7 +378,7 @@ class ProjectController extends Controller
 
     public function usersCompletedProject(Request $request)
     {
-         $attributes = Config::get('protectedWith.project');
+        $attributes = Config::get('protectedWith.project');
         $projects = $request->user()
             ->projects()
             ->where('completed_on', '!=', null);

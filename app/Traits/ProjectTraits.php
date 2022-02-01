@@ -2,6 +2,7 @@
 
 namespace App\Traits;
 
+use App\Exceptions\CustomError;
 use App\Models\Payment;
 use App\Models\ProjectApplications;
 use Illuminate\Support\Arr;
@@ -10,21 +11,23 @@ use Illuminate\Support\Facades\DB;
 
 trait ProjectTraits
 {
-    public function isPublishable(): bool
+    public function isPublishable()
     {
         if ($this->posted_on) {
-            return "Project is already live";
+            throw CustomError::throw("Project is already live");
         }
 
         $params = Config::get('constants.canPublish');
-        if ($this->model == 1) {
-            $params = Arr::except($params, ['country_id', 'region_id', 'address']);
-        }
+        $params = $this->model == 1 ? Arr::except($params, ['country_id', 'region_id', 'address']) : $params;
 
         foreach ($params as $key => $value) {
             if (!$this->$key) {
-                return "The project requires {$value} to be publishable";
+                throw  CustomError::throw("The project requires {$value} to be publishable");
             }
+        }
+
+        if (!$this->isPaidFor()) {
+            throw  CustomError::throw("Kindly make payment before publishing your job");
         }
 
         return true;
@@ -32,7 +35,7 @@ trait ProjectTraits
 
     public function isPaidFor(): bool
     {
-        return $this->payment()->where('status', 2)->count() ? true : false;
+        return !!$this->payment && $this->payment->status == 2;
     }
 
     public function isDeletable(): bool

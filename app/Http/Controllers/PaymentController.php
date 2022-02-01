@@ -69,6 +69,8 @@ class PaymentController extends Controller
             return redirect()->away("{$frontendUrl}?status=fail&message={$e->getMessage()}");
         }
 
+        return "payment is successful, we need a success page i can redirect to";
+
         return redirect()->away("{$frontendUrl}?status=success");
     }
 

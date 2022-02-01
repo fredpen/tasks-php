@@ -187,37 +187,3 @@ Route::group(['prefix' => 'project/status', 'middleware' => 'auth:sanctum'], fun
 
     Route::get('completed', [ProjectApplicationController::class, 'markCompleted']);
 });
-
-
-///////////////////////////////////////////////////////////////////////
-
-
-
-
-//     Route::get('notifications', 'AccountController@notifications')->name('notifications')->middleware('auth'); //for notifications
-//     Route::get('myTasks', 'AccountController@myTasks')->name('myTasks')->middleware('auth');
-//     Route::get('region/show/ajax/{id}', 'RegionController@showAjax');//country ajax to show regions
-//     Route::get('city/show/ajax/{id}', 'CityController@showAjax');//country ajax to show city
-
-
-
-
-//     // route group for chnaging status of projects
-//     Route::name('project.')->group(function () {
-//         Route::get('projectstatus/{project}/completed', 'ProjectStatusController@completed')->name('complete');
-//         Route::get('projectstatus/{project}/live', 'ProjectStatusController@live')->name('live');
-//         Route::get('projectstatus/{project}/cancelled', 'ProjectStatusController@cancelled')->name('cancel');
-//         Route::get('projectstatus/{project}/posted', 'ProjectStatusController@posted')->name('post');
-//     });
-
-//     Route::post('/pay', 'RaveController@initialize')->name('pay');
-//     Route::post('/rave/callback', 'RaveController@callback')->name('callback');
-//     Route::get('/{project}/payment', 'RaveController@payment')->name('payment');
-
-
-
-// roles durations and other creation details
-// Route::group(['name' => 'createOPtions'], function () {
-//     Route::get('createOPtions', 'CreateOptionsController@createOPtions')->name('createOPtions');
-//     Route::get('roles', 'CreateOptionsController@roles')->name('roles');
-// });
