@@ -306,7 +306,7 @@ class ProjectController extends Controller
             'num_of_taskMaster' => 'nullable|integer|min:1|max:10',
             'budget' => 'nullable|numeric|min:1000',
             'experience' => 'nullable|integer|min:1|max:5',
-            'proposed_start_date' =>  "nullable|date_format:d/m/Y|after_or_equal:'.$todayDate'",
+            'proposed_start_date' =>  "nullable|date_format:Y-m-d|after_or_equal:'.$todayDate'",
             'description' => 'nullable|string',
             'title' => 'nullable|string|min:10',
             'duration' => 'nullable|string',

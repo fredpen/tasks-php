@@ -111,6 +111,11 @@ Route::group(['prefix' => 'project', 'name' => 'project'], function () {
         Route::post('unfavour', [ProjectController::class, 'unFavouredAProject']);
         Route::get('my_favourites', [ProjectController::class, 'favouritesProjects']);
         Route::get('my_favourite_ids', [ProjectController::class, 'favouriteProjectsIds']);
+        
+        Route::group(['prefix' => 'media'], function () {
+            Route::post('add', [ProjectphotoController::class, 'addMedia']);
+            Route::post('remove', [ProjectphotoController::class, 'removeMedia']);
+        });
 
         Route::middleware(['projectAdminRight'])->group(function () {
             Route::patch('update', [ProjectController::class, 'update']);
@@ -118,10 +123,7 @@ Route::group(['prefix' => 'project', 'name' => 'project'], function () {
             Route::patch('cancel', [ProjectController::class, 'cancel']);
             Route::get('publish/{projectId}', [ProjectController::class, 'publish']);
 
-            Route::group(['prefix' => 'media'], function () {
-                Route::post('add', [ProjectphotoController::class, 'addMedia']);
-                Route::post('remove', [ProjectphotoController::class, 'removeMedia']);
-            });
+
         });
     });
 });

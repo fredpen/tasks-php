@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Helpers\ResponseHelper;
 use App\Models\Project;
-use App\Models\Projectphoto;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
+use App\Models\Projectphoto;
+use App\Helpers\ResponseHelper;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Database\Eloquent\Collection;
 
 class ProjectphotoController extends Controller
 {
@@ -16,39 +16,26 @@ class ProjectphotoController extends Controller
     {
         $request->validate([
             'project_id' => 'required|exists:projects,id',
-            'attachments' => ['required', 'image', 'max:2000000']
+            'attachment' => ['required', 'file', 'max:2000'],
         ]);
 
-        $project =  Project::query()->where('id', $request->project_id);
-        if (!$project->count()) {
-            return ResponseHelper::notFound("Invalid Project ID");
+        try {
+            $project =  Project::findorFail($request->project_id);
+            $files = $request->file("attachment");
+            $url = $this->uploadMedia($files, $project->id);
+            $project->photos()->create(['url' => $url]);
+        } catch (\Throwable $th) {
+            return ResponseHelper::serverError($th->getMessage());
         }
 
-        $project = $project->first();
-        $files = $request->file("attachments");
-
-        if (!is_array($files)) {
-            $uploadedMediaUrl = $this->uploadMedia($files, $project->id);
-            $createMedia =  Projectphoto::create(['url' => $uploadedMediaUrl, "project_id" => $project->id]);
-        } else {
-            $requestObject = [];
-            foreach ($files as $file) {
-                $uploadedMediaUrl = $this->uploadMedia($files, $project->id);
-                $requestObject[] = ['url' => $uploadedMediaUrl, "project_id" => $project->id];
-            }
-
-            $createMedia =  Projectphoto::createMany($requestObject);
-        }
-
-        return $createMedia ?
-            ResponseHelper::sendSuccess([], 'Media attached to project successfully') : ResponseHelper::serverError();
+        return  ResponseHelper::sendSuccess([], 'Media attached to project successfully');
     }
 
     public function removeMedia(Request $request)
     {
         $request->validate([
             'project_id' => 'required|exists:projects,id',
-            'attachment_ids' => ['required','array']
+            'attachment_ids' => ['required', 'array', "min:1"]
         ]);
 
         $projectphotos = Projectphoto::query()
@@ -63,20 +50,16 @@ class ProjectphotoController extends Controller
         $deleteMedia = $projectphotos->delete();
 
         return $deleteMedia ?
-            ResponseHelper::sendSuccess([], 'Media removed to project successfully') : ResponseHelper::serverError();
-
+            ResponseHelper::sendSuccess([], 'Media removed from project successfully') :
+            ResponseHelper::serverError();
     }
 
     private function deleteMediaFile(Collection $projectphotos)
     {
         $baseUrl = Config::get('app.url') . "/storage/";
+        $urls = $projectphotos->each(fn ($photo) => str_replace($baseUrl, "", $photo->url));
 
-        $locationArray = [];
-        foreach ($projectphotos as $photo) {
-            $locationArray[] = str_replace($baseUrl, "", $photo->url);
-        }
-
-        Storage::delete($locationArray);
+        return Storage::delete($urls);
     }
 
     private function uploadMedia($requestFiles, int $projectId)
@@ -86,29 +69,4 @@ class ProjectphotoController extends Controller
 
         return "{$baseUrl}/storage/{$url}";
     }
-
-
-
-    // public function store(Request $request, Projectphoto $projectphoto)
-    // {
-    //     $file = $request->file('file');
-    //     $image_name = $projectphoto->saveFile($file);
-
-    //     if ($userId = $request->profilePicture) {
-    //         $user = User::findOrFail($userId);
-    //         $user->update(['imageurl' => $image_name]);
-    //     } else {
-    //         $project = Project::findOrFail($request->project_id);
-    //         if ($project->photos->count() >= 3) return false;
-    //         $projectphoto->create(['url' => $image_name, 'project_id' => $request->project_id]);
-    //     }
-    // }
-
-
-    // public function destroy($id)
-    // {
-    //     $file = Projectphoto::findOrFail($id);
-    //     unlink(public_path() . "/images/".$file->url);
-    //     $file->delete();
-    // }
 }
