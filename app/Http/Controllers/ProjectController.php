@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Helpers\ResponseHelper;
 use App\Models\Project;
-use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\Config;
 
 class ProjectController extends Controller
@@ -199,11 +198,11 @@ class ProjectController extends Controller
         try {
             $project->isPublishable();
             $project->update(['posted_on' => now()]);
-            return ResponseHelper::sendSuccess([], 'Project is now live');
         } catch (\Throwable $th) {
             return ResponseHelper::badRequest($th->getMessage());
         }
 
+        return ResponseHelper::sendSuccess([], 'Project is now live');
         // return $project->owner->notify((new ProjectPosted)->delay(10)->onQueue('notifs'));
     }
 
@@ -283,7 +282,7 @@ class ProjectController extends Controller
             'num_of_taskMaster' => 'required|integer|min:1|max:10',
             'budget' => 'required|numeric|min:1000',
             'experience' => 'required|integer|min:1|max:5',
-            'proposed_start_date' =>  "required|date_format:d/m/Y|after_or_equal:'.$todayDate'",
+            'proposed_start_date' =>  "required|date_format:Y-m-d|after_or_equal:'.$todayDate'",
             'description' => 'required|string|min:20',
             'title' => 'required|string|min:10',
             'duration' => 'required|string',
