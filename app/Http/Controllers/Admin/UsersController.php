@@ -9,7 +9,43 @@ use Illuminate\Http\Request;
 
 class UsersController extends Controller
 {
-    private $limit = 20;
+    public function search(Request $request)
+    {
+        $this->validateSearch($request);
+        $users = User::query();
+
+        if ($request->searchTerm) {
+            $searchTerm = $request->searchTerm;
+            $users = $users->where(function ($query) use ($searchTerm) {
+                $query->where('name', "like", "%{$searchTerm}%")
+                    ->orWhere('email', "like", "%{$searchTerm}%")
+                    ->orWhere('address', "like", "%{$searchTerm}%")
+                    ->orWhere('phone_number', "like", "%{$searchTerm}%");
+            });
+        }
+
+
+        if ($request->country_ids) {
+            $users->whereIn('country_id', $request->country_ids);
+        }
+
+        if ($request->region_ids) {
+            $users->whereIn('region_id', $request->region_ids);
+        }
+
+        if ($request->city_ids) {
+            $users->whereIn('city_id', $request->city_ids);
+        }
+
+        if (!$users->count()) {
+            return ResponseHelper::notFound("Query returns empty");
+        }
+
+        return ResponseHelper::sendSuccess(
+            $users->latest()->paginate($this->limit)
+        );
+    }
+
 
     public function all()
     {
@@ -19,5 +55,15 @@ class UsersController extends Controller
             ResponseHelper::sendSuccess($users
                 ->orderBy('updated_at', 'desc')
                 ->paginate($this->limit)) : ResponseHelper::notFound();
+    }
+
+    private function validateSearch(Request $request)
+    {
+        return $request->validate([
+            'searchTerm' => 'sometimes|string|min:4',
+            'country_ids' => 'sometimes|array|min:1',
+            'region_ids' => 'sometimes|array|min:1',
+            'city_ids' => 'sometimes|array|min:1',
+        ]);
     }
 }

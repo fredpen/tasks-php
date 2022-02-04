@@ -9,6 +9,8 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class Controller extends BaseController
 {
+    public $limit = 30;
+
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
 
 }

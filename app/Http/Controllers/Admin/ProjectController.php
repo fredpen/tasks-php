@@ -10,78 +10,26 @@ use Illuminate\Support\Facades\Config;
 
 class ProjectController extends Controller
 {
-    private $limit = 20;
 
-    public function drafts()
+    public function search(string $searchTerm)
     {
-        $attributes = Config::get('protectedWith.project');
-        $projects = Project::query()->where('posted_on', null);
+        $lookUp = collect(["drafts", "published", "started", "completed", "cancelled", "deleted"]);
 
-        return $projects->count() ?
-            ResponseHelper::sendSuccess($projects
-                ->with($attributes)
-                ->orderBy('updated_at', 'desc')
-                ->paginate($this->limit)) : ResponseHelper::notFound();
-    }
+        if (!$lookUp->contains($searchTerm)) {
+            return ResponseHelper::notFound("Invalid identifier '{$searchTerm}'");
+        }
 
-    public function published()
-    {
-        $attributes = Config::get('protectedWith.project');
-        $projects = Project::query()->where('posted_on', '!=', null);
+        $projects = $this->{$searchTerm}();
 
-        return $projects->count() ?
-            ResponseHelper::sendSuccess($projects
-                ->with($attributes)
-                ->orderBy('updated_at', 'desc')
-                ->paginate($this->limit)) : ResponseHelper::notFound();
-    }
+        if (!$projects->count()) {
+            return ResponseHelper::notFound("Query returns empty");
+        }
 
-    public function started()
-    {
-        $attributes = Config::get('protectedWith.project');
-        $projects = Project::query()->where('started_on', '!=', null);
-
-        return $projects->count() ?
-            ResponseHelper::sendSuccess($projects
-                ->with($attributes)
-                ->orderBy('updated_at', 'desc')
-                ->paginate($this->limit)) : ResponseHelper::notFound();
-    }
-
-    public function completed()
-    {
-        $attributes = Config::get('protectedWith.project');
-        $projects = Project::query()->where('completed_on', '!=', null);
-
-        return $projects->count() ?
-            ResponseHelper::sendSuccess($projects
-                ->with($attributes)
-                ->orderBy('updated_at', 'desc')
-                ->paginate($this->limit)) : ResponseHelper::notFound();
-    }
-
-    public function cancelled()
-    {
-        $attributes = Config::get('protectedWith.project');
-        $projects = Project::query()->where('cancelled_on', '!=', null);
-
-        return $projects->count() ?
-            ResponseHelper::sendSuccess($projects
-                ->with($attributes)
-                ->orderBy('updated_at', 'desc')
-                ->paginate($this->limit)) : ResponseHelper::notFound();
-    }
-
-    public function deleted()
-    {
-        $attributes = Config::get('protectedWith.project');
-        $projects = Project::query()->where('deleted_at', '!=', null);
-
-        return $projects->count() ?
-            ResponseHelper::sendSuccess($projects
-                ->with($attributes)
-                ->orderBy('updated_at', 'desc')
-                ->paginate($this->limit)) : ResponseHelper::notFound();
+        return ResponseHelper::sendSuccess(
+            $projects->with(Config::get('protectedWith.project'))
+                ->latest()
+                ->paginate($this->limit)
+        );
     }
 
     public function usersProject(Request $request)
@@ -94,5 +42,43 @@ class ProjectController extends Controller
                 ->with($attributes)
                 ->orderBy('updated_at', 'desc')
                 ->paginate($this->limit)) : ResponseHelper::notFound();
-    } 
+    }
+
+    private function drafts()
+    {
+        return Project::where('posted_on', null)
+            ->where("cancelled_on", null)
+            ->where("deleted_at", null);
+    }
+
+    private function published()
+    {
+        return Project::where('posted_on', '!=', null)
+            ->where("cancelled_on", null)
+            ->where("deleted_at", null);
+    }
+
+    private function started()
+    {
+        return Project::where('started_on', '!=', null)
+            ->where("cancelled_on", null)
+            ->where("deleted_at", null);
+    }
+
+    private function completed()
+    {
+        return Project::where('completed_on', '!=', null)
+            ->where("cancelled_on", null)
+            ->where("deleted_at", null);
+    }
+
+    private function cancelled()
+    {
+        return Project::where('cancelled_on', '!=', null);
+    }
+
+    private function deleted()
+    {
+        return Project::where('deleted_at', '!=', null);
+    }
 }

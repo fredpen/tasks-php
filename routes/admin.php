@@ -9,18 +9,20 @@ use Illuminate\Support\Facades\Route;
 
 // Projects
 Route::prefix('project')->group(function () {
-    Route::get('drafts',  [ProjectController::class, 'drafts']);
-    Route::get('published',  [ProjectController::class, 'published']);
-    Route::get('started',  [ProjectController::class, 'started']);
-    Route::get('completed',  [ProjectController::class, 'completed']);
-    Route::get('cancelled',  [ProjectController::class, 'cancelled']);
-    Route::get('deleted',  [ProjectController::class, 'deleted']);
+    Route::get('{searchTerm}',  [ProjectController::class, 'search']);
+    // Route::get('drafts',  [ProjectController::class, 'drafts']);
+    // Route::get('published',  [ProjectController::class, 'published']);
+    // Route::get('started',  [ProjectController::class, 'started']);
+    // Route::get('completed',  [ProjectController::class, 'completed']);
+    // Route::get('cancelled',  [ProjectController::class, 'cancelled']);
+    // Route::get('deleted',  [ProjectController::class, 'deleted']);
     Route::get('user/{user_id}',  [ProjectController::class, 'usersProject']);
 });
 
 // users
 Route::prefix('users')->group(function () {
     Route::get('all',  [UsersController::class, 'all']);
+    Route::post('search',  [UsersController::class, 'search']);
 });
 
 // Projects applications
