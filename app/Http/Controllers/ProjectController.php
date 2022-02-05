@@ -30,9 +30,9 @@ class ProjectController extends Controller
             return ResponseHelper::sendSuccess([]);
         }
 
-        $attributes = Config::get('protectedWith.project');
+
         $projects = $projects
-            ->with($attributes)
+            ->with(Config::get('protectedWith.project'))
             ->orderBy('updated_at', 'desc')
             ->inRandomOrder()
             ->take(4)
@@ -41,19 +41,24 @@ class ProjectController extends Controller
         return ResponseHelper::sendSuccess($projects, 'successful');
     }
 
+    public function popular()
+    {
+        return ResponseHelper::sendSuccess(
+            Project::query()
+                ->withCount('applications')
+                ->orderBy('applications_count', 'desc')
+                ->paginate($this->limit),
+            'successful'
+        );
+    }
+
     public function appliableProjects()
     {
-        $projects =  Project::query()
-            ->where('cancelled_on', null)
-            ->where('deleted_at', null)
-            ->where('assigned_on', null)
-            ->where('posted_on', '!=', null);
-
-        $attributes = Config::get('protectedWith.project');
-
+        $projects =  (new Project)->appliable();
+        
         return $projects->count() ?
             ResponseHelper::sendSuccess($projects
-                ->with($attributes)
+                ->with(Config::get('protectedWith.project'))
                 ->latest()
                 ->paginate($this->Limit)) : ResponseHelper::notFound();
     }

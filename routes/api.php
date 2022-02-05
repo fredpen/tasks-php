@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\GeneralController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\LocationController;
@@ -12,6 +13,13 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\UserSkillsController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\NotificationController;
+
+// general
+Route::group(['prefix' => 'general'], function () {
+
+    Route::get('landing-page-details', [GeneralController::class, 'landing'])->name('landing');
+
+});
 
 // auth
 Route::group(['prefix' => 'auth'], function () {
@@ -92,6 +100,7 @@ Route::group(['prefix' => 'location', 'name' => 'location'], function () {
 Route::group(['prefix' => 'project', 'name' => 'project'], function () {
 
     Route::get('all', [ProjectController::class, 'index']);
+    Route::get('popular', [ProjectController::class, 'popular']);
     Route::get('active', [ProjectController::class, 'activeProjects']);
     Route::get('appliable', [ProjectController::class, 'appliableProjects']);
     Route::get('related-to/{project_id}', [ProjectController::class, 'relatedProjects']);
@@ -111,7 +120,7 @@ Route::group(['prefix' => 'project', 'name' => 'project'], function () {
         Route::post('unfavour', [ProjectController::class, 'unFavouredAProject']);
         Route::get('my_favourites', [ProjectController::class, 'favouritesProjects']);
         Route::get('my_favourite_ids', [ProjectController::class, 'favouriteProjectsIds']);
-        
+
         Route::group(['prefix' => 'media'], function () {
             Route::post('add', [ProjectphotoController::class, 'addMedia']);
             Route::post('remove', [ProjectphotoController::class, 'removeMedia']);

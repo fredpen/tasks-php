@@ -29,6 +29,15 @@ class Project extends Model
         return $this->hasOne(Payment::class);
     }
 
+    public function appliable()
+    {
+        return $this->where('cancelled_on', null)
+            ->where('deleted_at', null)
+            ->where('assigned_on', null)
+            ->where('hasPaid', 1)
+            ->where('posted_on', '!=', null);
+    }
+
     public function scopeLocalWhereIn($query, string $columnName, array $keys)
     {
         return $query->whereIn($columnName, $keys);

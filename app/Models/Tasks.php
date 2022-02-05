@@ -18,6 +18,11 @@ class Tasks extends Model
         return $this->hasMany(SubTask::class, 'task_id');
     }
 
+    public function projects()
+    {
+        return $this->hasMany(Project::class, 'task_id');
+    }
+
     public function masters()
     {
         return $this->belongsToMany(User::class, 'user_tasks', 'task_id', 'user_id');

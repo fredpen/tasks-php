@@ -21,6 +21,11 @@ class Region extends Model
         return $this->hasMany(City::class);
     }
 
+    public function projects()
+    {
+        return $this->hasMany(Project::class);
+    }
+
     public function user()
     {
         return $this->hasMany(User::class);
