@@ -3,12 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\ResponseHelper;
-use App\Notifications\ProjectAppllication;
 use Illuminate\Http\Request;
 
 class NotificationController extends Controller
 {
-    private $limit = 20;
+    public $limit = 30;
 
     public function all(Request $request)
     {

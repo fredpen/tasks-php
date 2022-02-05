@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Config;
 
 class ProjectController extends Controller
 {
-    private $Limit = 20;
+    private $Limit = 30;
 
     public function relatedProjects(Request $request)
     {
@@ -55,7 +55,7 @@ class ProjectController extends Controller
     public function appliableProjects()
     {
         $projects =  (new Project)->appliable();
-        
+
         return $projects->count() ?
             ResponseHelper::sendSuccess($projects
                 ->with(Config::get('protectedWith.project'))
@@ -166,7 +166,7 @@ class ProjectController extends Controller
         return $projects->count() ?
             ResponseHelper::sendSuccess($projects
                 ->with($attributes)
-                ->orderBy('updated_at', 'desc')
+                ->latest()
                 ->paginate($this->Limit)) : ResponseHelper::notFound();
     }
 
