@@ -18,9 +18,22 @@ class User extends Authenticatable implements MustVerifyEmail
 
     protected $guarded = [];
 
+    protected $appends = ['account_secured', 'can_apply'];
+
     protected $hidden = [
-        'password', 'security_answer', 'security_question', 'remember_token', 'identification', 'access_code'
+        'password', 'security_answer', 'canApply', 'remember_token', 'identification', 'access_code'
     ];
+
+    public function getCanApplyAttribute()
+    {
+        return !!$this->security_answer && $this->identification && $this->has('skills');
+    }
+
+    public function getAccountSecuredAttribute()
+    {
+        return !!$this->security_answer;
+    }
+
 
     protected $casts = [
         'email_verified_at' => 'datetime',

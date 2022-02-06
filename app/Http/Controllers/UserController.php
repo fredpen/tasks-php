@@ -43,7 +43,7 @@ class UserController extends Controller
         $userDetails = $user->with(['country:id,name', 'region:id,name', 'city:id,name', 'skills.skill:id,name'])
             ->get(['id', 'title', 'name', 'country_id', 'region_id', 'city_id', 'address', 'email', 'avatar', 'ratings', 'bio', 'linkedln']);
 
-         $workHistoryFreelancer = $user->first()->myApplications()->where('isCompleted_task_master', '!=', null)->with('projects:description,title,created_at,id')->get(['owner_rating', 'owner_comment', 'id', 'project_id']);
+        $workHistoryFreelancer = $user->first()->myApplications()->where('isCompleted_task_master', '!=', null)->with('projects:description,title,created_at,id')->get(['owner_rating', 'owner_comment', 'id', 'project_id']);
 
         $workHistoryEmployer =  $user->first()->projects()
             ->where('completed_on', '!=', null)
@@ -141,7 +141,7 @@ class UserController extends Controller
                 'address' => ['sometimes', 'required', 'string', 'min:3'],
                 "linkedln" => ['sometimes', 'required', 'string', 'min:3'],
                 "bio" => ['sometimes', 'required', 'string', 'min:3'],
-                "avatar" => ['sometimes', 'required', 'image', 'max:2000000'],
+                "avatar" => ['sometimes', 'mimes:jpg,jpeg,png', 'max:2000000'],
             ]);
         }
 
@@ -158,8 +158,8 @@ class UserController extends Controller
             "linkedln" => ['sometimes', 'required', 'string', 'min:3'],
             "bio" => ['sometimes', 'required', 'string', 'min:3'],
             "email" => ['sometimes', 'required', 'email', 'unique:'],
-            "avatar" => ['sometimes', 'required', 'image', 'max:2000000'],
-            "identification" => ['sometimes', 'required', 'image', 'max:2000000']
+            "avatar" => ['sometimes', 'mimes:jpg,jpeg,png', 'max:2000000'],
+            "identification" => ['sometimes', 'mimes:jpg,jpeg,png', 'max:2000000']
         ]);
     }
 }
