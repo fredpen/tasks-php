@@ -13,6 +13,11 @@ class ResponseHelper
         return response()->json($response, 200);
     }
 
+    public static function successNoContent()
+    {
+        return response()->json(['message' => "Success"], 204);
+    }
+
     public static function notFound($message = "Resources not available")
     {
         $response = [
@@ -44,7 +49,4 @@ class ResponseHelper
         ];
         return response()->json($response, 500);
     }
-
-
-
 }

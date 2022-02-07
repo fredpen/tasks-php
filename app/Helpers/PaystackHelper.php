@@ -8,14 +8,14 @@ use Illuminate\Support\Facades\Http;
 
 class PaystackHelper
 {
-    public static function init($amount, $email)
+    public static function init($amount, $email, $callback_url = false)
     {
         $reference = time();
         $baseUrl = Config::get('app.url');
         $paystackAmount = round($amount * 100); //paystack works in kobo
         $token = Config::get('rave.payments.test_Secret_key');
         $endpoint = "https://api.paystack.co/transaction/initialize";
-        $redirect_url = "{$baseUrl}/api/project/payment/verify";
+        $redirect_url = $callback_url ? $callback_url : "{$baseUrl}/api/project/payment/verify";
 
         $response = Http::withToken($token)->post($endpoint, [
             "amount" => $paystackAmount,
@@ -38,7 +38,7 @@ class PaystackHelper
         $url = "https://api.paystack.co/transaction/verify/{$reference}";
 
         $response = Http::withToken($token)->get($url);
-         $paymentDetails = $response->object();
+        $paymentDetails = $response->object();
 
         if ($response->failed()) {
             throw PaymentException::paystackError($paymentDetails->message);
@@ -55,6 +55,4 @@ class PaystackHelper
 
         return true;
     }
-
-
 }

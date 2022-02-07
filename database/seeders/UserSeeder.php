@@ -12,7 +12,7 @@ class UserSeeder extends Seeder
     public function run()
     {
         User::factory()
-            ->has(UserSkills::factory()->count(5), 'skills')
+            ->has(UserSkills::factory()->count(8), 'skills')
             ->count(15)
             ->create();
 

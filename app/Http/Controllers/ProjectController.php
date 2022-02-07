@@ -186,9 +186,9 @@ class ProjectController extends Controller
     {
         $request->validate(['budget' => 'required|numeric|min:10']);
         $data = $this->validateProjectCreateRequest($request);
-        $create = $request->user()->projects()->create($data);
+        $project = $request->user()->projects()->create($data);
 
-        return $create ? ResponseHelper::sendSuccess([]) : ResponseHelper::serverError();
+        return $project ? ResponseHelper::sendSuccess($project) : ResponseHelper::serverError();
         // $project->owner->notify((new projectCreated));
     }
 

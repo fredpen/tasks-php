@@ -140,7 +140,7 @@ Route::group(['prefix' => 'project', 'name' => 'project'], function () {
 // payments
 Route::group(['prefix' => 'project/payment'], function () {
 
-    Route::get('verify', [PaymentController::class, 'verify']);
+    Route::get('verify-transaction', [PaymentController::class, 'verify']);
 
     Route::middleware(['auth:sanctum'])->group(function () {
 

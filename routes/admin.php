@@ -16,6 +16,7 @@ Route::prefix('project')->group(function () {
 // users
 Route::prefix('users')->group(function () {
     Route::get('all',  [UsersController::class, 'all']);
+    Route::delete('delete/{user_id}',  [UsersController::class, 'delete']);
     Route::post('search',  [UsersController::class, 'search']);
 });
 

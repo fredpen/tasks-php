@@ -16,7 +16,7 @@ class PaymentController extends Controller
 
     public function initiate(Request $request)
     {
-        $request->validate(['project_id' => 'required|exists:projects,id']);
+        $request->validate(['project_id' => 'required|exists:projects,id', 'callback_url' => 'sometimes', 'string', 'url']);
 
         $user = $request->user();
         $project = Project::query()
@@ -32,7 +32,7 @@ class PaymentController extends Controller
         }
 
         try {
-            $paystackData = PaystackHelper::init($project->budget, $user->email);
+            $paystackData = PaystackHelper::init($project->budget, $user->email, $request->callback_url);
         } catch (PaymentException $e) {
             return ResponseHelper::serverError($e->getMessage());
         }
@@ -55,23 +55,21 @@ class PaymentController extends Controller
 
     public function verify(Request $request)
     {
-        $frontendUrl = "http://tasks.test/front";
+
         $reference =  $request->reference;
 
         try {
             $payment = Payment::fetchUsingReference($reference);
-            $verification = PaystackHelper::verfiy($reference, $payment->amount);
+            PaystackHelper::verfiy($reference, $payment->amount);
             $project = Project::where('id', $payment->project_id)->first();
             $project->giveValueFor($payment);
         } catch (PaymentException $e) {
-            return redirect()->away("{$frontendUrl}?status=fail&message={$e->getMessage()}");
+            return ResponseHelper::badRequest($e->getMessage());
         } catch (\Throwable $e) {
-            return redirect()->away("{$frontendUrl}?status=fail&message={$e->getMessage()}");
+            return ResponseHelper::badRequest($e->getMessage());
         }
 
-        return "payment is successful, we need a success page i can redirect to";
-
-        return redirect()->away("{$frontendUrl}?status=success");
+        return ResponseHelper::sendSuccess([], "Payment has been successfully paid for");
     }
 
     public function userPayments(Request $request)

@@ -23,11 +23,5 @@ class LocationSeeder extends Seeder
         DB::unprepared($countriesSql);
         DB::unprepared($regionsPath);
         DB::unprepared($cityPath);
-
-        // Country::factory()
-        //     ->count(10)
-        //     ->has(Region::factory()->count(5), 'regions')
-        //     ->has(City::factory()->count(5), 'cities')
-        //     ->create();
     }
 }
