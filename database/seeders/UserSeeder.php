@@ -13,8 +13,14 @@ class UserSeeder extends Seeder
     {
         User::factory()
             ->has(UserSkills::factory()->count(8), 'skills')
-            ->count(15)
+            ->count(100)
             ->create();
+
+        // admin
+        User::factory()
+            ->has(UserSkills::factory()->count(5), 'skills')
+            ->count(50)
+            ->create(["country_id" => 1]);
 
         // admin
         User::factory()

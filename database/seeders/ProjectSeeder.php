@@ -17,7 +17,7 @@ class ProjectSeeder extends Seeder
             ->has(Projectphoto::factory()->count(3), 'photos')
             ->has(FavouredProject::factory()->count(10), 'photos')
             ->has(ProjectApplications::factory()->count(10), 'applications')
-            ->count(50)
+            ->count(200)
             ->create();
     }
 }
