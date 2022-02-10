@@ -69,7 +69,7 @@ class PaymentController extends Controller
             return ResponseHelper::badRequest($e->getMessage());
         }
 
-        return ResponseHelper::sendSuccess([], "Payment has been successfully paid for");
+        return ResponseHelper::sendSuccess($project, "Payment has been successfully paid for");
     }
 
     public function userPayments(Request $request)
