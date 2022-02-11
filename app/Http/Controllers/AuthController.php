@@ -101,7 +101,7 @@ class AuthController extends Controller
 
         $credentials = request(['email', 'password']);
         if (!Auth::attempt($credentials)) {
-            return ResponseHelper::unAuthorised("Incorrect email and password combination");
+            return ResponseHelper::badRequest("Incorrect email and password combination");
         }
 
         $user = Auth::user();
