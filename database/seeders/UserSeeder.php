@@ -42,5 +42,20 @@ class UserSeeder extends Seeder
 
                 ]
             );
+
+        User::factory()
+            ->has(UserSkills::factory()->count(5), 'skills')
+            ->create(
+                [
+                    'name' => "Admin user 2",
+                    'email' => "sola@gmail.com",
+                    "isActive" => 1,
+                    "role_id" => 0,
+                    "title" => "Software developer",
+                    "country_id" => 1,
+                    "region_id" => 1,
+                    "city_id" => 1
+                ]
+            );
     }
 }

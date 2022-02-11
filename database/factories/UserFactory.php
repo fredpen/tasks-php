@@ -24,20 +24,20 @@ class UserFactory extends Factory
             'name' => $this->faker->name(),
             'email' => $this->faker->unique()->safeEmail(),
             'email_verified_at' => now(),
-            'isActive' => 0,
-            'role_id' => $this->faker->randomElement($roles),
+            'isActive' => 1,
+            'role_id' => 1,
             'phone_number' =>  $this->faker->phoneNumber,
             'password' => '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', // password
             'remember_token' => Str::random(10),
             "title" => $valid ?  $this->faker->sentence(10) : null,
             "bio" => $valid ?  $this->faker->paragraph(10) : null,
             "linkedln" => $valid ?  $this->faker->sentence(10) : null,
-            "country_id" =>$valid ?  $country : null,
-            "region_id" =>$valid ?  $region : null,
-            "city_id" =>$valid ?  $city : null,
-            "address" => $valid ?  $this->faker->address : null,
-            "identification" => $valid ? $this->faker->imageUrl() : null,
-            "avatar" => $valid ? $this->faker->imageUrl() : null,
+            "country_id" => $valid ?  $country : null,
+            "region_id" => $valid ?  $region : null,
+            "city_id" => $valid ?  $city : null,
+            "address" => $this->faker->address,
+            "identification" => $this->faker->imageUrl(),
+            "avatar" => $this->faker->imageUrl(),
         ];
     }
 

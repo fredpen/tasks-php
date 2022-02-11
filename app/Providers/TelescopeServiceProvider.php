@@ -21,6 +21,7 @@ class TelescopeServiceProvider extends TelescopeApplicationServiceProvider
         $this->hideSensitiveRequestDetails();
 
         Telescope::filter(function (IncomingEntry $entry) {
+            return false;
             if ($this->app->environment('local')) {
                 return true;
             }
@@ -64,7 +65,7 @@ class TelescopeServiceProvider extends TelescopeApplicationServiceProvider
     {
         Gate::define('viewTelescope', function ($user) {
             return in_array($user->email, [
-                "fredrickksola@gmail.com"  
+                "fredrickksola@gmail.com"
             ]);
         });
     }

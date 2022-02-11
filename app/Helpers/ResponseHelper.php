@@ -23,7 +23,7 @@ class ResponseHelper
         $response = [
             'message' => $message,
         ];
-        return response()->json($response, 404);
+        return response()->json($response, 204);
     }
 
     public static function unAuthorised($message = "Unauthorised")

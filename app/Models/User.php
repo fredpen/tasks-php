@@ -20,7 +20,7 @@ class User extends Authenticatable implements MustVerifyEmail
 
     protected $guarded = [];
 
-    protected $appends = ['account_secured', 'can_apply'];
+    protected $appends = ['account_secured', 'can_apply', 'is_admin'];
 
     protected $hidden = [
         'password', 'security_answer', 'canApply', 'remember_token', 'identification', 'access_code'
@@ -29,6 +29,11 @@ class User extends Authenticatable implements MustVerifyEmail
     public function getCanApplyAttribute()
     {
         return !!$this->security_answer && $this->identification && $this->has('skills');
+    }
+
+    public function getIsAdminAttribute()
+    {
+        return $this->isAdmin();
     }
 
     public function getAccountSecuredAttribute()
