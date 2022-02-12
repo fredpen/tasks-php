@@ -349,7 +349,7 @@ class ProjectController extends Controller
             return ResponseHelper::invalidRoute("Invalid identifier '{$searchTerm}'");
         }
 
-        $projects = $this->{$searchTerm}($request->user());
+         $projects = $this->{$searchTerm}($request->user());
 
         if (!$projects->count()) {
             return ResponseHelper::sendSuccess([]);

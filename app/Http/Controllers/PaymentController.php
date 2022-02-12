@@ -16,23 +16,18 @@ class PaymentController extends Controller
 
     public function initiate(Request $request)
     {
-        $request->validate(['project_id' => 'required|exists:projects,id', 'callback_url' => 'sometimes', 'string', 'url']);
+        $request->validate(['project_id' => 'required|exists:projects,id', 'amount' => "required|numeric", 'callback_url' => 'sometimes', 'string', 'url']);
 
         $user = $request->user();
-        $project = Project::query()
-            ->where('id', $request->project_id)
-            ->where('user_id', $user->id)->first();
+        $amount = $request->amount;
+        $project = Project::where('id', $request->project_id)->where('user_id', $user->id)->first();
 
         if (!$project) {
             return ResponseHelper::badRequest('Project does not belongs to you');
         }
 
-        if ($project->payment()->where('status', 2)->count()) {
-            return ResponseHelper::badRequest('Payment has already been made for this project');
-        }
-
         try {
-            $paystackData = PaystackHelper::init($project->budget, $user->email, $request->callback_url);
+            $paystackData = PaystackHelper::init($amount, $user->email, $request->callback_url);
         } catch (PaymentException $e) {
             return ResponseHelper::serverError($e->getMessage());
         }
@@ -40,7 +35,7 @@ class PaymentController extends Controller
         $payment = Payment::create([
             'user_id' => $user->id,
             'project_id' => $request->project_id,
-            'amount_paid' => $project->budget,
+            'amount_paid' => $amount,
             'authorization_url' => $paystackData['authorization_url'],
             'reference' => $paystackData['reference'],
             'access_code' => $paystackData['access_code'],
@@ -69,7 +64,7 @@ class PaymentController extends Controller
             return ResponseHelper::badRequest($e->getMessage());
         }
 
-        return ResponseHelper::sendSuccess($project, "Payment has been successfully paid for");
+        return ResponseHelper::sendSuccess(["project_id" => $project->id], "Payment has been successfully paid for");
     }
 
     public function userPayments(Request $request)

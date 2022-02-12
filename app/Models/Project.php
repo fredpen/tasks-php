@@ -24,9 +24,9 @@ class Project extends Model
         return $this->belongsTo(Tasks::class, 'task_id');
     }
 
-    public function payment()
+    public function payments()
     {
-        return $this->hasOne(Payment::class);
+        return $this->hasMany(Payment::class);
     }
 
     public function appliable()
