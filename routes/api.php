@@ -111,19 +111,22 @@ Route::group(['prefix' => 'project', 'name' => 'project'], function () {
 
     Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('store', [ProjectController::class, 'store']);
-        Route::get('my_projects', [ProjectController::class, 'usersProject']);
-        Route::get('my_drafts', [ProjectController::class, 'usersProject']);
-        Route::get('my_cancelled_projects', [ProjectController::class, 'usersCancelProject']);
-        Route::get('my_running_projects', [ProjectController::class, 'usersRunningProject']);
-        Route::get('my_completed_projects', [ProjectController::class, 'usersCompletedProject']);
+
+        // Route::get('my_drafts', [ProjectController::class, 'usersProject']);
+        // Route::get('my_cancelled_projects', [ProjectController::class, 'usersCancelProject']);
+        // Route::get('my_running_projects', [ProjectController::class, 'usersRunningProject']);
+        // Route::get('my_completed_projects', [ProjectController::class, 'usersCompletedProject']);
         Route::post('favoured', [ProjectController::class, 'favouredAProject']);
         Route::post('unfavour', [ProjectController::class, 'unFavouredAProject']);
-        Route::get('my_favourites', [ProjectController::class, 'favouritesProjects']);
+        // Route::get('my_favourites', [ProjectController::class, 'favouritesProjects']);
         Route::get('my_favourite_ids', [ProjectController::class, 'favouriteProjectsIds']);
+
+        // "my_drafts", "my_cancelled_projects", "my_completed_projects", "my_running_projects", "my_favourites", "my_projects"]);
+        Route::get('{searchTerm}', [ProjectController::class, 'search']);
 
         Route::group(['prefix' => 'media'], function () {
             Route::post('add', [ProjectphotoController::class, 'addMedia']);
-            Route::post('remove', [ProjectphotoController::class, 'removeMedia']);
+            Route::post('remove', [ProjectphotoController::class, 'removeMedia']);//
         });
 
         Route::middleware(['projectAdminRight'])->group(function () {

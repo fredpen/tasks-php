@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Helpers\ResponseHelper;
 use App\Models\Project;
+use App\Models\User;
 use Illuminate\Support\Facades\Config;
 
 class ProjectController extends Controller
@@ -339,93 +340,72 @@ class ProjectController extends Controller
     }
 
     ///usrers
-
-    public function usersProject(Request $request)
+    public function search(Request $request)
     {
-        $projects = $request->user()->projects();
-        $attributes = Config::get('protectedWith.project');
+        $searchTerm = $request->searchTerm;
+        $lookUp = collect(["my_drafts", "my_cancelled_projects", "my_completed_projects", "my_running_projects", "my_favourites", "my_projects"]);
 
-        return $projects->count() ?
-            ResponseHelper::sendSuccess($projects
-                ->with($attributes)
-                ->orderBy('updated_at', 'desc')
-                ->paginate($this->Limit)) : ResponseHelper::notFound();
+        if ($lookUp->doesntContain($searchTerm)) {
+            return ResponseHelper::invalidRoute("Invalid identifier '{$searchTerm}'");
+        }
+
+        $projects = $this->{$searchTerm}($request->user());
+
+        if (!$projects->count()) {
+            return ResponseHelper::sendSuccess([]);
+        }
+
+        return ResponseHelper::sendSuccess(
+            $projects
+                ->with(Config::get('protectedWith.project'))
+                ->latest()
+                ->paginate($this->limit)
+        );
     }
 
-    public function usersDraftProject(Request $request)
+    private function my_drafts(User $user)
     {
-        $attributes = Config::get('protectedWith.project');
-        $projects = $request->user()
-            ->projects()
-            ->where('posted_on', null);
-
-        return $projects->count() ?
-            ResponseHelper::sendSuccess($projects
-                ->with($attributes)
-                ->orderBy('updated_at', 'desc')
-                ->paginate($this->Limit)) : ResponseHelper::notFound();
-    }
-
-    public function usersCancelProject(Request $request)
-    {
-        $attributes = Config::get('protectedWith.project');
-        $projects = $request->user()
-            ->projects()
-            ->where('cancelled_on', '!=', null);
-
-        return $projects->count() ?
-            ResponseHelper::sendSuccess($projects
-                ->with($attributes)
-                ->orderBy('updated_at', 'desc')
-                ->paginate($this->Limit)) : ResponseHelper::notFound();
-    }
-
-    public function usersCompletedProject(Request $request)
-    {
-        $attributes = Config::get('protectedWith.project');
-        $projects = $request->user()
-            ->projects()
-            ->where('completed_on', '!=', null);
-
-        return $projects->count() ?
-            ResponseHelper::sendSuccess($projects
-                ->with(['applications' => function ($query) {
-                    $query->where('assigned', '!=', null)
-                        ->where('hasAccepted', '!=', null);
-                }])
-                ->with($attributes)
-                ->orderBy('updated_at', 'desc')
-                ->paginate($this->Limit)) : ResponseHelper::notFound();
+        return $user->projects()
+            ->where('posted_on', null)
+            ->where("cancelled_on", null)
+            ->where("deleted_at", null);
     }
 
 
-    public function usersRunningProject(Request $request)
+    private function my_projects(User $user)
     {
-        $attributes = Config::get('protectedWith.project');
-        $projects = $request->user()
-            ->projects()
+        return $user->projects();
+    }
+
+
+    private function my_cancelled_projects(User $user)
+    {
+        return $user->projects()->where('cancelled_on', '!=', null);
+    }
+
+    private function my_completed_projects(User $user)
+    {
+        return $user->projects()
+            ->with(['applications' => function ($query) {
+                $query->where('assigned', '!=', null)
+                    ->where('hasAccepted', '!=', null);
+            }]);
+    }
+
+    private function my_running_projects(User $user)
+    {
+        return $user->projects()
             ->where('started_on', '!=', null)
+            ->where('posted_on', '!=', null)
             ->where('cancelled_on', null)
             ->where('completed_on', null);
-
-        return $projects->count() ?
-            ResponseHelper::sendSuccess($projects
-                ->with($attributes)
-                ->orderBy('updated_at', 'desc')
-                ->paginate($this->Limit)) : ResponseHelper::notFound();
     }
 
 
-    public function favouritesProjects(Request $request)
+    private function my_favourites(User $user)
     {
-        $projects = $request->user()->likedProjects();
-        $attributes = Config::get('protectedWith.favouredProject');
-
-        return $projects->count() ?
-            ResponseHelper::sendSuccess($projects
-                ->with($attributes)
-                ->orderBy('updated_at', 'desc')
-                ->paginate($this->Limit)) : ResponseHelper::notFound();
+        $ids = $user->likedProjects()->distinct()->pluck('project_id');
+        return Project::whereIn('id', $ids);
     }
 
     public function favouriteProjectsIds(Request $request)
