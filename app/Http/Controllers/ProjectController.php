@@ -98,7 +98,7 @@ class ProjectController extends Controller
         }
 
         if (!$projects->count()) {
-            return ResponseHelper::notFound("Query returns empty");
+            return ResponseHelper::sendSuccess([], "Query returns empty");
         }
 
         $attributes = Config::get('protectedWith.project');
@@ -170,7 +170,6 @@ class ProjectController extends Controller
                 ->paginate($this->Limit)) : ResponseHelper::notFound();
     }
 
-
     public function show($projectId)
     {
         $projects =  Project::query()->where('id', $projectId);
@@ -184,7 +183,6 @@ class ProjectController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate(['budget' => 'required|numeric|min:10']);
         $data = $this->validateProjectCreateRequest($request);
         $project = $request->user()->projects()->create($data);
 
