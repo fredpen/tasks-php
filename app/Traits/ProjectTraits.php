@@ -35,7 +35,7 @@ trait ProjectTraits
 
     public function isPaidFor(): bool
     {
-        return !!$this->payment && $this->payment->status == 2;
+        return !!count($this->payments());
     }
 
     public function isDeletable(): bool
@@ -89,9 +89,10 @@ trait ProjectTraits
                 'payment_description' => 'payment successful'
             ]);
 
+            $amountPaidSoFar = $this->hasPaid ? ($this->amount_paid + $payment->amount_paid) : $payment->amount_paid;
             $this->update([
                 'hasPaid' => true,
-                'amount_paid' => $payment->amount_paid
+                'amount_paid' => $amountPaidSoFar
             ]);
         }, 2);
     }

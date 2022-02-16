@@ -13,6 +13,11 @@ class ResponseHelper
         return response()->json($response, 200);
     }
 
+    public static function invalidRoute($message = "not found")
+    {
+        return response()->json(['message' => $message], 404);
+    }
+
     public static function successNoContent()
     {
         return response()->json(['message' => "Success"], 204);

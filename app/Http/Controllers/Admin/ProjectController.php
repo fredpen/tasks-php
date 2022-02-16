@@ -16,7 +16,7 @@ class ProjectController extends Controller
         $lookUp = collect(["drafts", "published", "started", "completed", "cancelled", "deleted"]);
 
         if (!$lookUp->contains($searchTerm)) {
-            return ResponseHelper::notFound("Invalid identifier '{$searchTerm}'");
+            return ResponseHelper::invalidRoute("Invalid identifier '{$searchTerm}'");
         }
 
         $projects = $this->{$searchTerm}();
