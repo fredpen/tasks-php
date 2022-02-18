@@ -341,9 +341,9 @@ class ProjectController extends Controller
     public function search(Request $request)
     {
         $searchTerm = $request->searchTerm;
-        $lookUp = collect(["my_drafts", "my_cancelled_projects", "my_completed_projects", "my_running_projects", "my_favourites", "my_projects"]);
+        $lookUp = ["my_drafts", "my_cancelled_projects", "my_completed_projects", "my_running_projects", "my_favourites", "my_projects"];
 
-        if ($lookUp->doesntContain($searchTerm)) {
+        if (in_array($searchTerm, $lookUp) == false) {
             return ResponseHelper::invalidRoute("Invalid identifier '{$searchTerm}'");
         }
 
