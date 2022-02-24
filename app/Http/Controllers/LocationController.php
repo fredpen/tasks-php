@@ -11,6 +11,38 @@ use Illuminate\Support\Facades\Cache;
 
 class LocationController extends Controller
 {
+    public function regionDetail(string $regionId)
+    {
+        $cacheName = "region{$regionId}";
+        try {
+            $region = Cache::get($cacheName, function () use ($regionId, $cacheName) {
+                $region = Region::findOrFail($regionId);
+                Cache::put($cacheName, $region);
+                return $region;
+            });
+        } catch (\Throwable $th) {
+            return ResponseHelper::badRequest("Invalid region ID");
+        }
+
+        return ResponseHelper::sendSuccess($region);
+    }
+
+    public function cityDetail(string $cityId)
+    {
+        $cacheName = "city{$cityId}";
+        try {
+            $city = Cache::get($cacheName, function () use ($cityId, $cacheName) {
+                $city = City::findOrFail($cityId);
+                Cache::put($cacheName, $city);
+                return $city;
+            });
+        } catch (\Throwable $th) {
+            return ResponseHelper::badRequest("Invalid city ID");
+        }
+
+        return ResponseHelper::sendSuccess($city);
+    }
+
     public function countriesOnly()
     {
         if (Cache::has('countriesOnly') && count(Cache::get("countriesOnly"))) {

@@ -91,6 +91,8 @@ Route::group(['prefix' => 'subTask', 'name' => 'subTask'], function () {
 Route::group(['prefix' => 'location', 'name' => 'location'], function () {
     Route::get('countries', [LocationController::class, 'countries']);
     Route::get('countries-only', [LocationController::class, 'countriesOnly']);
+    Route::get('region-detail/{region_id}', [LocationController::class, 'regionDetail']);
+    Route::get('city-detail/{city_id}', [LocationController::class, 'cityDetail']);
     Route::get('regions-only', [LocationController::class, 'regionsOnly']);
     Route::get('regions_in_a_country/{countryId}', [LocationController::class, 'regions']);
     Route::get('cities_in_a_region/{regionId}',  [LocationController::class, 'cities']);
@@ -128,8 +130,6 @@ Route::group(['prefix' => 'project', 'name' => 'project'], function () {
             Route::delete('delete', [ProjectController::class, 'delete']);
             Route::patch('cancel', [ProjectController::class, 'cancel']);
             Route::get('publish/{projectId}', [ProjectController::class, 'publish']);
-
-
         });
     });
 });

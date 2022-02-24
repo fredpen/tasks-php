@@ -46,6 +46,16 @@ class UsersController extends Controller
         );
     }
 
+    public function update(string $user_id)
+    {
+        $user = User::find($user_id);
+        if (!$user) {
+            return ResponseHelper::badRequest("Invalid user ID");
+        }
+
+        return $user->delete() ?
+            ResponseHelper::successNoContent([]) : ResponseHelper::serverError("couldnt delete user");
+    }
 
     public function delete(string $user_id)
     {
