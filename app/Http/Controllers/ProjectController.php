@@ -277,9 +277,9 @@ class ProjectController extends Controller
         return $request->validate([
             'task_id' => 'required|integer|exists:tasks,id',
             'sub_task_id' => 'required|integer|exists:sub_tasks,id',
-            'country_id' => 'exclude_if:model,1|integer|exists:countries,id',
-            'region_id' => 'exclude_if:model,1|integer|exists:regions,id',
-            'city_id' => 'exclude_if:model,1|integer|exists:cities,id',
+            'country_id' => 'required_if:model,2|exclude_if:model,1|integer|exists:countries,id',
+            'region_id' => 'required_if:model,2|exclude_if:model,1|integer|exists:regions,id',
+            'city_id' => 'required_if:model,2|exclude_if:model,1|integer|exists:cities,id',
 
             'model' => 'required|integer|min:1|max:2',
             'num_of_taskMaster' => 'required|integer|min:1|max:10',
@@ -289,7 +289,7 @@ class ProjectController extends Controller
             'description' => 'required|string|min:20',
             'title' => 'required|string|min:10',
             'duration' => 'required|string',
-            'address' => 'exclude_if:model,1|string|min:10',
+            'address' => 'required_if:model,2|exclude_if:model,1|string|min:10',
         ]);
     }
 
