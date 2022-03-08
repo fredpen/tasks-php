@@ -366,6 +366,7 @@ class ProjectController extends Controller
         return $user->projects()
             ->where('posted_on', null)
             ->where("cancelled_on", null)
+            ->where('completed_on', null)
             ->where("deleted_at", null);
     }
 
@@ -384,6 +385,10 @@ class ProjectController extends Controller
     private function my_completed_projects(User $user)
     {
         return $user->projects()
+            ->where('started_on', '!=', null)
+            ->where('posted_on', '!=', null)
+            ->where('cancelled_on', null)
+            ->where('completed_on', '!=', null)
             ->with(['applications' => function ($query) {
                 $query->where('assigned', '!=', null)
                     ->where('hasAccepted', '!=', null);
