@@ -341,7 +341,7 @@ class ProjectController extends Controller
     public function search(Request $request)
     {
         $searchTerm = $request->searchTerm;
-        $lookUp = ["my_drafts", "my_cancelled_projects", "my_completed_projects", "my_running_projects", "my_favourites", "my_projects"];
+        $lookUp = ["my_drafts", "my_cancelled_projects", "my_completed_projects", "my_running_projects", "my_favourites", "my_projects", "my_published_projects"];
 
         if (in_array($searchTerm, $lookUp) == false) {
             return ResponseHelper::invalidRoute("Invalid identifier '{$searchTerm}'");
@@ -359,6 +359,23 @@ class ProjectController extends Controller
                 ->latest()
                 ->paginate($this->limit)
         );
+    }
+
+    private function my_published_projects(User $user)
+    {
+        return $user->projects()
+            ->where('posted_on', '!=', null)
+            ->where('cancelled_on', null)
+            ->where('completed_on', null);
+    }
+
+    private function my_running_projects(User $user)
+    {
+        return $user->projects()
+            ->where('started_on', '!=', null)
+            ->where('posted_on', '!=', null)
+            ->where('cancelled_on', null)
+            ->where('completed_on', null);
     }
 
     private function my_drafts(User $user)
@@ -395,14 +412,7 @@ class ProjectController extends Controller
             }]);
     }
 
-    private function my_running_projects(User $user)
-    {
-        return $user->projects()
-            ->where('started_on', '!=', null)
-            ->where('posted_on', '!=', null)
-            ->where('cancelled_on', null)
-            ->where('completed_on', null);
-    }
+
 
 
     private function my_favourites(User $user)
