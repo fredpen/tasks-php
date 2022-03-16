@@ -320,11 +320,7 @@ class ProjectController extends Controller
     private function validateSearchRequest(Request $request)
     {
         return $request->validate([
-            'num_of_taskMaster' => 'sometimes|integer|min:1',
-            'address' => 'sometimes|string',
             'description' => 'sometimes|string',
-            'title' => 'sometimes|string',
-
             'task_id' => 'sometimes|array|min:1',
             'sub_task_id' => 'sometimes|array|min:1',
             'country_id' => 'sometimes|array|min:1',
@@ -332,8 +328,6 @@ class ProjectController extends Controller
             'city_id' => 'sometimes|array|min:1',
             'model' => 'sometimes|array|min:1|max:2',
             'experience' =>  'sometimes|array|min:1',
-            // 'budget' => 'nullable|numeric|min:10',
-            // 'proposed_start_date' => 'nullable|date',
         ]);
     }
 
