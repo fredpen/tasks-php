@@ -9,8 +9,9 @@ use Illuminate\Support\Facades\Route;
 
 // Projects
 Route::prefix('project')->group(function () {
-    Route::get('{searchTerm}',  [ProjectController::class, 'search']);
+    Route::post('search-projects',  [ProjectController::class, 'deepSearch']);
     Route::get('user/{user_id}',  [ProjectController::class, 'usersProject']);
+    Route::get('{searchTerm}',  [ProjectController::class, 'search']);
 });
 
 // users
