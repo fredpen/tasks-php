@@ -42,20 +42,23 @@ class UsersController extends Controller
         }
 
         return ResponseHelper::sendSuccess(
-            $users->latest()->paginate($this->limit)
+            $users
+            ->with(['country:id,name', 'region:id,name', 'city:id,name'])
+            ->latest()
+            ->paginate($this->limit)
         );
     }
 
-    public function update(string $user_id)
-    {
-        $user = User::find($user_id);
-        if (!$user) {
-            return ResponseHelper::badRequest("Invalid user ID");
-        }
+    // public function update(string $user_id)
+    // {
+    //     $user = User::find($user_id);
+    //     if (!$user) {
+    //         return ResponseHelper::badRequest("Invalid user ID");
+    //     }
 
-        return $user->delete() ?
-            ResponseHelper::successNoContent([]) : ResponseHelper::serverError("couldnt delete user");
-    }
+    //     return $user->delete() ?
+    //         ResponseHelper::successNoContent([]) : ResponseHelper::serverError("couldnt delete user");
+    // }
 
     public function delete(string $user_id)
     {
@@ -74,7 +77,8 @@ class UsersController extends Controller
 
         return $users->count() ?
             ResponseHelper::sendSuccess($users
-                ->orderBy('updated_at', 'desc')
+                ->with(['country:id,name', 'region:id,name', 'city:id,name'])
+                ->latest()
                 ->paginate($this->limit)) : ResponseHelper::notFound();
     }
 

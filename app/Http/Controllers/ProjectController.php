@@ -343,7 +343,7 @@ class ProjectController extends Controller
 
         $projects = $this->{$searchTerm}($request->user());
 
-        if (!$projects->count()) {
+        if ($projects->count() < 1) {
             return ResponseHelper::sendSuccess([]);
         }
 
@@ -354,6 +354,12 @@ class ProjectController extends Controller
                 ->paginate($this->limit)
         );
     }
+
+    private function my_cancelled_projects(User $user)
+    {
+        return $user->projects()->where('cancelled_on', '!=', null);
+    }
+
 
     private function my_published_projects(User $user)
     {
@@ -385,12 +391,6 @@ class ProjectController extends Controller
     private function my_projects(User $user)
     {
         return $user->projects();
-    }
-
-
-    private function my_cancelled_projects(User $user)
-    {
-        return $user->projects()->where('cancelled_on', '!=', null);
     }
 
     private function my_completed_projects(User $user)
