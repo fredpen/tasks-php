@@ -17,6 +17,7 @@ Route::prefix('project')->group(function () {
 // users
 Route::prefix('users')->group(function () {
     Route::get('all',  [UsersController::class, 'all']);
+    Route::get('update-status',  [UsersController::class, 'updateStatus']);
     Route::delete('delete/{user_id}',  [UsersController::class, 'delete']);
     Route::post('search',  [UsersController::class, 'search']);
 });
