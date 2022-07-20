@@ -9,13 +9,15 @@ use Illuminate\Support\Facades\Route;
 
 // Projects
 Route::prefix('project')->group(function () {
-    Route::get('{searchTerm}',  [ProjectController::class, 'search']);
+    Route::post('search-projects',  [ProjectController::class, 'deepSearch']);
     Route::get('user/{user_id}',  [ProjectController::class, 'usersProject']);
+    Route::get('{searchTerm}',  [ProjectController::class, 'search']);
 });
 
 // users
 Route::prefix('users')->group(function () {
     Route::get('all',  [UsersController::class, 'all']);
+    Route::get('update-status',  [UsersController::class, 'updateStatus']);
     Route::delete('delete/{user_id}',  [UsersController::class, 'delete']);
     Route::post('search',  [UsersController::class, 'search']);
 });

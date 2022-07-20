@@ -211,11 +211,35 @@ class ProjectApplicationController extends Controller
             return ResponseHelper::notFound("user doesn't have applications yet");
         }
 
-        if ($request->status === "completed") {
-           $myApplications = $myApplications->where('isCompleted_owner', '!=', null)->orWhere('isCompleted_task_master', '!=', null);
+        $status = $request->status;
+        if ($status === "applied") {
+            $myApplications = $myApplications->where('assigned', null);
         }
-        
-        return $myApplications->with('projects.owner:name,ratings,ratings_count,id')->paginate(10);
+
+        if ($status === "assigned") {
+            $myApplications = $myApplications
+                ->where('assigned', "!=", null)
+                ->where('isCompleted_owner', null)
+                ->where('isCompleted_task_master', null);
+        }
+
+        if ($status === "accepted") {
+            $myApplications = $myApplications
+                ->where('hasAccepted', "!=", null)
+                ->where('isCompleted_owner', null)
+                ->where('isCompleted_task_master', null);
+        }
+
+
+        if ($status === "completed") {
+            $myApplications = $myApplications->where('isCompleted_owner', '!=', null)->orWhere('isCompleted_task_master', '!=', null);
+        }
+
+        if (!$myApplications->count()) {
+            return ResponseHelper::sendSuccess("user doesn't have {$status} applications yet");
+        }
+
+        return $myApplications->with('projects.owner:name,ratings,ratings_count,id')->paginate(20);
     }
 
     public function myApplicationIds(Request $request)

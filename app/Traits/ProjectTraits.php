@@ -35,7 +35,7 @@ trait ProjectTraits
 
     public function isPaidFor(): bool
     {
-        return !!count($this->payments());
+        return !!count($this->payments);
     }
 
     public function isDeletable(): bool
