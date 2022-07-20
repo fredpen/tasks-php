@@ -60,6 +60,13 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->isAdmin();
     }
 
+    public function getAvatarAttribute($value)
+    {
+        $baseUrl = Config::get('app.url');
+        return $value ?
+        "{$baseUrl}/{$value}" : "kdkdkd";
+    }
+
     public function getAccountSecuredAttribute()
     {
         return !!$this->security_answer;
