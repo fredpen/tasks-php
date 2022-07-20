@@ -8,6 +8,7 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Support\Facades\Config;
 use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable implements MustVerifyEmail
@@ -20,15 +21,38 @@ class User extends Authenticatable implements MustVerifyEmail
 
     protected $guarded = [];
 
-    protected $appends = ['account_secured', 'can_apply', 'is_admin'];
+    protected $appends = [
+        'account_secured',
+        // 'can_apply',
+        'is_admin',
+        "user_role"
+    ];
+
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+    ];
 
     protected $hidden = [
-        'password', 'security_answer', 'canApply', 'remember_token', 'identification', 'access_code'
+        'password',
+        'security_answer',
+        'canApply',
+        'remember_token',
+        'identification',
+        'access_code'
     ];
+
+    public function getUserRoleAttribute()
+    {
+        $role = "0{$this->role_id}";
+        return $role && Config::get("constants.roles") ?
+            Config::get("constants.roles")[$role] : null;
+    }
 
     public function getCanApplyAttribute()
     {
-        return !!$this->security_answer && $this->identification && $this->has('skills');
+        return !!$this->security_answer &&
+            $this->identification &&
+            $this->has('skills');
     }
 
     public function getIsAdminAttribute()
@@ -41,10 +65,6 @@ class User extends Authenticatable implements MustVerifyEmail
         return !!$this->security_answer;
     }
 
-
-    protected $casts = [
-        'email_verified_at' => 'datetime',
-    ];
 
     public function likedProjects()
     {

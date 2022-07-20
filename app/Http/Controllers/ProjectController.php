@@ -4,14 +4,13 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Helpers\ResponseHelper;
+use App\Models\FavouredProject;
 use App\Models\Project;
 use App\Models\User;
 use Illuminate\Support\Facades\Config;
 
 class ProjectController extends Controller
 {
-    private $Limit = 30;
-
     public function relatedProjects(Request $request)
     {
         $project = Project::find($request->project_id);
@@ -19,49 +18,20 @@ class ProjectController extends Controller
             return ResponseHelper::notFound('Invalid project Id');
         }
 
-        $projects = Project::where('id', '!=', $project->id);
-
-        $projects = $projects->where(function ($query) use ($project) {
-            $query->where('task_id', $project->id)
-                ->orWhere('region_id', $project->region_id)
-                ->orWhere('model', $project->model);
-        });
-
-        if (!$projects->count()) {
-            return ResponseHelper::sendSuccess([]);
-        }
-
+        $projects = Project::where('id', '!=', $project->id)
+            ->where(function ($query) use ($project) {
+                $query->where('task_id', $project->task_id)
+                    ->orWhere('region_id', $project->region_id)
+                    ->orWhere('model', $project->model);
+            });
 
         $projects = $projects
             ->with(Config::get('protectedWith.project'))
-            ->orderBy('updated_at', 'desc')
             ->inRandomOrder()
             ->take(4)
             ->get();
 
         return ResponseHelper::sendSuccess($projects, 'successful');
-    }
-
-    public function popular()
-    {
-        return ResponseHelper::sendSuccess(
-            Project::query()
-                ->withCount('applications')
-                ->orderBy('applications_count', 'desc')
-                ->paginate($this->limit),
-            'successful'
-        );
-    }
-
-    public function appliableProjects()
-    {
-        $projects =  (new Project)->appliable();
-
-        return $projects->count() ?
-            ResponseHelper::sendSuccess($projects
-                ->with(Config::get('protectedWith.project'))
-                ->latest()
-                ->paginate($this->Limit)) : ResponseHelper::notFound();
     }
 
     public function projectAttributes()
@@ -73,6 +43,7 @@ class ProjectController extends Controller
 
     public function searchProject(Request $request)
     {
+        return ResponseHelper::sendSuccess([], "use all projects with filter");
         $data = $this->validateSearchRequest($request);
 
         $projects = Project::query();
@@ -113,63 +84,45 @@ class ProjectController extends Controller
 
     public function unFavouredAProject(Request $request)
     {
-        $project = $request->validate(["project_id" => "required|exists:projects,id"]);
+        $request->validate(["project_id" => "required"]);
 
         $likedProject = $request->user()
             ->likedProjects()
             ->where('project_id', $request->project_id);
 
-        if (!$likedProject->count()) {
+        if ($likedProject->count() < 1) {
             return ResponseHelper::badRequest("You have not favoured this project before");
         }
 
         return  $likedProject->delete() ?
-            ResponseHelper::sendSuccess([], 'successful') : ResponseHelper::serverError();
+            ResponseHelper::sendSuccess() :
+            ResponseHelper::serverError();
     }
 
     public function favouredAProject(Request $request)
     {
-        $project = $request->validate(["project_id" => "required|exists:projects,id"]);
+        $request->validate(["project_id" => "required"]);
 
-        $likedProject = $request->user()
-            ->likedProjects()
-            ->where('project_id', $request->project_id);
+        $project = Project::query()
+            ->where("id", $request->project_id)
+            ->first();
 
-        if ($likedProject->count()) {
-            return ResponseHelper::badRequest("You have already favoured this project");
+        if (!$project) {
+            return ResponseHelper::badRequest("Invalid project Id");
         }
 
-        $favoured = $request->user()
-            ->likedProjects()
-            ->create($project);
+        $favoured = FavouredProject::firstOrCreate(
+            ["user_id" => $request->user()->id],
+            ["project_id" => $request->project_id]
+        );
 
         return $favoured ?
-            ResponseHelper::sendSuccess([], 'successful') : ResponseHelper::serverError();
+            ResponseHelper::sendSuccess() :
+            ResponseHelper::serverError();
     }
 
-    public function index()
-    {
-        $projects =  Project::query();
-        $attributes = Config::get('protectedWith.project');
 
-        return $projects->count() ?
-            ResponseHelper::sendSuccess($projects
-                ->with($attributes)
-                ->orderBy('updated_at', 'desc')
-                ->paginate($this->Limit)) : ResponseHelper::notFound();
-    }
 
-    public function activeProjects()
-    {
-        $projects =  Project::query()->where('cancelled_on', null);
-        $attributes = Config::get('protectedWith.project');
-
-        return $projects->count() ?
-            ResponseHelper::sendSuccess($projects
-                ->with($attributes)
-                ->latest()
-                ->paginate($this->Limit)) : ResponseHelper::notFound();
-    }
 
     public function show($projectId)
     {
@@ -185,7 +138,10 @@ class ProjectController extends Controller
     public function store(Request $request)
     {
         $data = $this->validateProjectCreateRequest($request);
-        $project = $request->user()->projects()->create($data);
+
+        $project = $request->user()
+            ->projects()
+            ->create($data);
 
         return $project ? ResponseHelper::sendSuccess($project) : ResponseHelper::serverError();
         // $project->owner->notify((new projectCreated));
@@ -222,7 +178,8 @@ class ProjectController extends Controller
         $update = $project->update($request->except(['id', 'user_id', 'isActive', 'status', 'posted_on', 'started_on', 'completed_on', 'cancelled_on', 'deleted_on', 'project_id']));
 
         return $update ?
-            ResponseHelper::sendSuccess([], 'update successful') : ResponseHelper::serverError();
+            ResponseHelper::sendSuccess([], 'update successful') :
+            ResponseHelper::serverError();
 
         // $project->owner->notify((new ProjectPosted)->delay(10)->onQueue('notifs'));
     }
@@ -407,8 +364,6 @@ class ProjectController extends Controller
     }
 
 
-
-
     private function my_favourites(User $user)
     {
         $ids = $user->likedProjects()->distinct()->pluck('project_id');
@@ -417,11 +372,9 @@ class ProjectController extends Controller
 
     public function favouriteProjectsIds(Request $request)
     {
-        $projects = $request->user()->likedProjects();
-
-        return $projects->count() ?
-            ResponseHelper::sendSuccess($projects
-                ->distinct()
-                ->pluck('project_id')) : ResponseHelper::notFound();
+        return $request->user()
+            ->likedProjects()
+            ->distinct()
+            ->pluck('project_id');
     }
 }

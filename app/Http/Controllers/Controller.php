@@ -9,8 +9,20 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class Controller extends BaseController
 {
-    public $limit = 30;
+    public $limit = 10;
+
+    public $order = "updated_at";
 
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
 
+
+    public function paginateMe($builder, string $order = null)
+    {
+        $data = $builder
+            ->latest($order ?? $this->order)
+            ->paginate(request()->per_page ?? $this->limit);
+
+        return $data && $data->count() ?
+            $data : null;
+    }
 }

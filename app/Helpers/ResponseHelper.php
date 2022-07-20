@@ -4,7 +4,7 @@ namespace App\Helpers;
 
 class ResponseHelper
 {
-    public static function sendSuccess($data, $message = "Success")
+    public static function sendSuccess($data = [], $message = "Success")
     {
         $response = [
             'message' => $message,

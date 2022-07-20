@@ -7,16 +7,41 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Config;
 
 class Project extends Model
 {
-    use HasFactory, ProjectTraits, SoftDeletes;
+    use HasFactory,
+        ProjectTraits,
+        SoftDeletes;
 
     protected $guarded = [];
+
+    protected $appends = [
+        'project_model',
+        "project_status",
+        "project_experience"
+    ];
 
     public function likes()
     {
         return $this->hasMany(FavouredProject::class);
+    }
+
+    public function getProjectModelAttribute()
+    {
+        $model = "0{$this->model}";
+        return Config::get("constants.projectModels")[$model];
+    }
+
+    public function getProjectExperienceAttribute()
+    {
+        return Config::get("constants.projectExpertise")[$this->experience];
+    }
+
+    public function getProjectStatusAttribute()
+    {
+        return Config::get("constants.projectStatus")[$this->status];
     }
 
     public function task()
@@ -34,7 +59,7 @@ class Project extends Model
         return $this->where('cancelled_on', null)
             ->where('deleted_at', null)
             ->where('assigned_on', null)
-            ->where('hasPaid', 1)
+            // ->where('hasPaid', 1)
             ->where('posted_on', '!=', null);
     }
 

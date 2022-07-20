@@ -3,7 +3,7 @@
 return [
     // roles
     'roles' => [
-        // 0 => 'Admin',
+        "00" => 'Admin',
         '01' => 'Task Giver',
         '02' => 'Task Master',
     ],

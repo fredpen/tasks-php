@@ -17,9 +17,7 @@ class SubTaskController extends Controller
 
     public function index()
     {
-        $subTasks =  $this->subTask;
-        return $subTasks->count() ?
-            ResponseHelper::sendSuccess($subTasks->paginate(20)) : ResponseHelper::notFound();
+        return $this->paginateMe($this->subTask);
     }
 
 
@@ -30,16 +28,20 @@ class SubTaskController extends Controller
             'name' => ['required', 'unique:sub_tasks', 'min:3']
         ]);
 
-        $subTask = $this->subTask->create($request->only(['name', 'task_id']));
+        $subTask = $this->subTask
+            ->create($request->only(['name', 'task_id']));
+
         return $subTask ?
-            ResponseHelper::sendSuccess([]) : ResponseHelper::serverError();
+            ResponseHelper::sendSuccess() :
+            ResponseHelper::serverError();
     }
 
     public function show($subTaskId)
     {
-        $subTask =  $this->subTask->where('id', $subTaskId);
-        return $subTask->count() ?
-            ResponseHelper::sendSuccess($subTask->first()) : ResponseHelper::notFound();
+        $subTask =  $this->subTask->where('id', $subTaskId)->first();
+        return $subTask ?
+            ResponseHelper::sendSuccess($subTask) :
+            ResponseHelper::notFound();
     }
 
     public function update(Request $request, $subTaskId)
@@ -56,7 +58,8 @@ class SubTaskController extends Controller
 
         $subTask = $subTask->update($request->only(['name', 'task_id']));
         return $subTask ?
-            ResponseHelper::sendSuccess([]) : ResponseHelper::serverError();
+            ResponseHelper::sendSuccess() :
+            ResponseHelper::serverError();
     }
 
 
