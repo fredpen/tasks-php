@@ -7,7 +7,7 @@ class ResponseHelper
     public static function sendSuccess($data = [], $message = "Success")
     {
         $response = [
-            'message' => $message,
+            'message' => $message ?? "Success",
             'data' => $data
         ];
         return response()->json($response, 200);

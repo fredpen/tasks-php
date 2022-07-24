@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Storage;
 use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable implements MustVerifyEmail
@@ -64,7 +65,9 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         $baseUrl = Config::get('app.url');
         return $value ?
-        "{$baseUrl}/{$value}" : "kdkdkd";
+        Storage::url($value) :
+        // "{$baseUrl}/{$value}" :
+         "kdkdkd";
     }
 
     public function getAccountSecuredAttribute()

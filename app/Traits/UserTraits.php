@@ -2,7 +2,6 @@
 
 namespace App\Traits;
 
-use App\Models\Project;
 use Illuminate\Support\Facades\Config;
 
 trait UserTraits
@@ -15,7 +14,7 @@ trait UserTraits
         $fileName = "$randomString.{$extension}";
         $url =  $requestFile->storeAs($location, $fileName);
 
-        return "storage/{$url}";
+        return "{$url}";
     }
 
     public function isProfileCompleted()

@@ -7,51 +7,47 @@ use Illuminate\Http\Request;
 
 class NotificationController extends Controller
 {
-    public $limit = 30;
-
     public function all(Request $request)
     {
         $notifications = $request->user()->notifications();
-        return $notifications->count() ?
-            ResponseHelper::sendSuccess($notifications->paginate($this->limit)) : ResponseHelper::notFound();
+
+        return $this->sendSuccess(
+            $this->paginateMe($notifications)
+        );
     }
 
     public function unread(Request $request)
     {
         $notifications = $request->user()->unreadNotifications();
-        return $notifications->count() ?
-            ResponseHelper::sendSuccess($notifications->paginate($this->limit)) : ResponseHelper::notFound();
+
+        return $this->sendSuccess(
+            $this->paginateMe($notifications)
+        );
     }
 
     public function delete(Request $request)
     {
         $request->validate(["notification_ids" => "array|min:1"]);
 
-        $notifications = $request->user()->notifications()
-            ->whereIn('id', $request->notification_ids);
+        $delete = $request->user()
+            ->notifications()
+            ->whereIn('id', $request->notification_ids)
+            ->delete();
 
-        if (!$notifications->count()) {
-            ResponseHelper::notFound();
-        }
-
-        return $notifications->delete() ?
-            ResponseHelper::sendSuccess([]) : ResponseHelper::notFound();
+        return $this->sendSuccess();
     }
 
     public function markAsRead(Request $request)
     {
         $request->validate(["notification_ids" => "array|min:1"]);
 
-        $notifications = $request->user()->notifications()
+        $update = $request->user()
+            ->notifications()
             ->whereIn('id', $request->notification_ids)
-            ->where('notifiable_id', $request->user()->id);
+            ->where('notifiable_id', $request->user()->id)
+            ->update(['read_at' => now()]);
 
-        if (!$notifications->count()) {
-            ResponseHelper::notFound();
-        }
-
-        return $notifications->update(['read_at' => now()]) ?
-            ResponseHelper::sendSuccess([]) : ResponseHelper::notFound();
+        return $this->sendSuccess();
     }
 
     public function markAllAsRead(Request $request)
