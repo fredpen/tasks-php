@@ -23,6 +23,10 @@ class Project extends Model
         "project_experience"
     ];
 
+    const CANCELED_STATUS = 0;
+    const POSTED_STATUS = 1;
+    const DELETED_STATUS = 5;
+
     public function likes()
     {
         return $this->hasMany(FavouredProject::class);
@@ -41,7 +45,7 @@ class Project extends Model
 
     public function getProjectStatusAttribute()
     {
-        return Config::get("constants.projectStatus")[$this->status];
+        return Config::get("constants.projectStatus")[$this->status] ?? null;
     }
 
     public function task()

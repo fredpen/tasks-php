@@ -5,20 +5,23 @@ namespace App\Traits;
 use App\Exceptions\CustomError;
 use App\Models\Payment;
 use App\Models\ProjectApplications;
+use Exception;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 
 trait ProjectTraits
 {
-    public function isPublishable()
+    public function isPublishable(): self
     {
         if ($this->posted_on) {
             throw CustomError::throw("Project is already live");
         }
 
         $params = Config::get('constants.canPublish');
-        $params = $this->model == 1 ? Arr::except($params, ['country_id', 'region_id', 'address']) : $params;
+        $params = $this->model == 1 ?
+            Arr::except($params, ['country_id', 'region_id', 'address']) :
+            $params;
 
         foreach ($params as $key => $value) {
             if (!$this->$key) {
@@ -30,7 +33,7 @@ trait ProjectTraits
             throw  CustomError::throw("Kindly make payment before publishing your job");
         }
 
-        return true;
+        return $this;
     }
 
     public function isPaidFor(): bool
@@ -38,17 +41,35 @@ trait ProjectTraits
         return !!count($this->payments);
     }
 
-    public function isDeletable(): bool
+    public function isDeletable(): self
     {
-        return $this->isAssigned(null) ?
-            "You can't delete because the project has been assigned" : true;
+        if ($this->isAssigned(null)) {
+            throw new Exception("You can't delete because the project has been assigned");
+        }
+
+        return $this;
     }
 
-    public function isCancellable(): bool
+    public function isCancellable(): self
     {
-        return $this->isAssigned(null) ?
-            "You can't cancel because the project has been assigned" : true;
+        if ($this->cancelled_on) {
+            throw new Exception("Project has already been cancelled");
+        }
+
+        if ($this->isAssigned(null)) {
+            throw new Exception("You can't cancel because the project has been assigned");
+        }
+
+        return $this;
     }
+
+    public static function fetchProject(int $projectId): self
+    {
+        return self::find($projectId) ??
+            throw new Exception("Invalid Project ID");
+    }
+
+
 
     public function openForApplications(): bool
     {

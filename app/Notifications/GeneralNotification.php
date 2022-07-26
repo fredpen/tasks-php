@@ -55,7 +55,7 @@ class GeneralNotification extends Notification
     {
         return [
             "intro" => "Hi {$notifiable->name},",
-            "from" => $this->from,
+            "from" => $this->from ?? "3HJOBS",
             "subject" => $this->subject,
             "body" => $this->body,
             "link" => $this->link,

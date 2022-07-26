@@ -2,12 +2,21 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Helpers\ResponseHelper;
-use App\Models\FavouredProject;
-use App\Models\Project;
-use App\Models\User;
 use Illuminate\Support\Facades\Config;
+use App\Helpers\ResponseHelper;
+use App\Notifications\GeneralNotification;
+use Illuminate\Http\Request;
+
+use App\Http\Requests\{
+    ProjectCreateRequest,
+    ProjectUpdateRequest
+};
+use App\Models\{
+    FavouredProject,
+    Hjobs,
+    Project,
+    User
+};
 
 class ProjectController extends Controller
 {
@@ -86,42 +95,34 @@ class ProjectController extends Controller
     {
         $request->validate(["project_id" => "required"]);
 
-        $likedProject = $request->user()
-            ->likedProjects()
-            ->where('project_id', $request->project_id);
-
-        if ($likedProject->count() < 1) {
-            return ResponseHelper::badRequest("You have not favoured this project before");
+        try {
+            $request->user()
+                ->likedProjects()
+                ->where('project_id', $request->project_id)
+                ->delete();
+            //
+        } catch (\Throwable $th) {
+            return ResponseHelper::serverError($th->getMessage());
         }
 
-        return  $likedProject->delete() ?
-            ResponseHelper::sendSuccess() :
-            ResponseHelper::serverError();
+        return ResponseHelper::sendSuccess();
     }
 
     public function favouredAProject(Request $request)
     {
         $request->validate(["project_id" => "required"]);
-
-        $project = Project::query()
-            ->where("id", $request->project_id)
-            ->first();
-
-        if (!$project) {
-            return ResponseHelper::badRequest("Invalid project Id");
+        try {
+            Project::fetchProject($request->project_id)
+                ->firstOrCreate(
+                    ["user_id" => $request->user()->id],
+                    ["project_id" => $request->project_id]
+                );
+        } catch (\Throwable $th) {
+            return ResponseHelper::badRequest($th->getMessage());
         }
 
-        $favoured = FavouredProject::firstOrCreate(
-            ["user_id" => $request->user()->id],
-            ["project_id" => $request->project_id]
-        );
-
-        return $favoured ?
-            ResponseHelper::sendSuccess() :
-            ResponseHelper::serverError();
+        return  ResponseHelper::sendSuccess();
     }
-
-
 
 
     public function show($projectId)
@@ -135,82 +136,119 @@ class ProjectController extends Controller
                 ->get()) : ResponseHelper::notFound();
     }
 
-    public function store(Request $request)
+
+    public function store(ProjectCreateRequest $request)
     {
-        $data = $this->validateProjectCreateRequest($request);
+        $data = $request->validated();
+        $data['num_of_taskMaster'] = 1;
+        $data['user_id'] = $request->user()->id;
 
-        $project = $request->user()
-            ->projects()
-            ->create($data);
+        try {
+            $project = Project::create($data);
 
-        return $project ? ResponseHelper::sendSuccess($project) : ResponseHelper::serverError();
-        // $project->owner->notify((new projectCreated));
+            $request->user()->notify((new GeneralNotification(
+                "Project Creation",
+                "Your project has been created",
+                false,
+                "#HJOOBS",
+                false
+            )));
+            //
+        } catch (\Throwable $th) {
+            return  ResponseHelper::badRequest($th->getMessage());
+        }
+
+        return ResponseHelper::sendSuccess($project);
     }
 
     public function publish($projectId)
     {
-        $project =  Project::find($projectId);
-
-        if (!$project) {
-            return ResponseHelper::notFound();
-        }
-
         try {
-            $project->isPublishable();
-            $project->update(['posted_on' => now()]);
+            $project = Project::fetchProject($projectId);
+
+            $project = $project->isPublishable()
+                ->update(['posted_on' => now(), "status" => Project::POSTED_STATUS]);
+
+            $project->owner()->notify((new GeneralNotification(
+                "Project Published",
+                "Your project has been published",
+                false,
+                Hjobs::APP_NAME,
+                false
+            )));
+            //
         } catch (\Throwable $th) {
             return ResponseHelper::badRequest($th->getMessage());
         }
 
         return ResponseHelper::sendSuccess([], 'Project is now live');
-        // return $project->owner->notify((new ProjectPosted)->delay(10)->onQueue('notifs'));
     }
 
-    public function update(Request $request)
+    public function update(ProjectUpdateRequest $request)
     {
-        $this->validateProjectUpdateRequest($request);
-
-        $project =  Project::query()->where('id', $request->project_id);
-        if (!$project->count()) {
-            return ResponseHelper::notFound("Invalid Project ID");
+        try {
+            Project::fetchProject($request->project_id)
+                ->update($request->except(['id', 'user_id', 'isActive', 'status', 'posted_on', 'started_on', 'completed_on', 'cancelled_on', 'deleted_on', 'project_id']));
+            //
+        } catch (\Throwable $th) {
+            return ResponseHelper::badRequest($th->getMessage());
         }
 
-        $update = $project->update($request->except(['id', 'user_id', 'isActive', 'status', 'posted_on', 'started_on', 'completed_on', 'cancelled_on', 'deleted_on', 'project_id']));
-
-        return $update ?
-            ResponseHelper::sendSuccess([], 'update successful') :
-            ResponseHelper::serverError();
-
-        // $project->owner->notify((new ProjectPosted)->delay(10)->onQueue('notifs'));
+        return ResponseHelper::sendSuccess();
     }
 
     public function cancel(Request $request)
     {
-        $request->validate(['project_id' => 'required|integer|exists:projects,id']);
+        $request->validate(['project_id' => 'required']);
 
-        $project =  Project::query()->where('id', $request->project_id);
-        if (!$project->count()) {
-            return ResponseHelper::notFound();
+        try {
+            $project =  Project::fetchProject($request->project_id)
+                ->isCancellable()
+                ->update([
+                    'cancelled_on' => now(),
+                    "status" => Project::CANCELED_STATUS
+                ]);
+
+            $project->owner()->notify((new GeneralNotification(
+                "Project cancellation",
+                "Your project has been cancelled",
+                false,
+                Hjobs::APP_NAME,
+                false
+            )));
+            //
+        } catch (\Throwable $th) {
+            return ResponseHelper::badRequest($th->getMessage());
         }
 
-        $project = $project->first();
-        if ($project->cancelled_on) {
-            return ResponseHelper::badRequest("Project has already been cancelled");
-        }
-
-        $errorMessage = $project->isCancellable();
-        if ($errorMessage !== true) {
-            return ResponseHelper::badRequest($errorMessage);
-        }
-
-        return $project->update(['cancelled_on' => now()]) ?
-            ResponseHelper::sendSuccess([]) : ResponseHelper::serverError();
-        // $project->owner->notify((new ProjectCancelled)->delay(10));
+        return ResponseHelper::sendSuccess();
     }
 
     public function delete(Request $request)
     {
-        $request->validate(['project_id' => 'required|integer|exists:projects,id']);
+        $request->validate(['project_id' => 'required']);
+
+        try {
+            $project =  Project::fetchProject($request->project_id)
+                ->isDeletable()
+                ->update([
+                    'deleted_at' => now(),
+                    "status" => Project::DELETED_STATUS
+                ]);
+
+            $project->owner()->notify((new GeneralNotification(
+                "Project deletion",
+                "Your project has been deleted",
+                false,
+                Hjobs::APP_NAME,
+                false
+            )));
+            //
+        } catch (\Throwable $th) {
+            return ResponseHelper::badRequest($th->getMessage());
+        }
+
+        return ResponseHelper::sendSuccess();
 
         $project =  Project::query()->where('id', $request->project_id);
         if (!$project->count()) {
@@ -227,52 +265,6 @@ class ProjectController extends Controller
         // $project->owner->notify((new ProjectCancelled)->delay(10));
     }
 
-    private function validateProjectCreateRequest($request)
-    {
-        $todayDate = date('d/m/Y');
-
-        return $request->validate([
-            'task_id' => 'required|integer|exists:tasks,id',
-            'sub_task_id' => 'required|integer|exists:sub_tasks,id',
-            'country_id' => 'required_if:model,2|exclude_if:model,1|integer|exists:countries,id',
-            'region_id' => 'required_if:model,2|exclude_if:model,1|integer|exists:regions,id',
-            'city_id' => 'required_if:model,2|exclude_if:model,1|integer|exists:cities,id',
-
-            'model' => 'required|integer|min:1|max:2',
-            'num_of_taskMaster' => 'required|integer|min:1|max:10',
-            'budget' => 'required|numeric|min:1000',
-            'experience' => 'required|integer|min:1|max:5',
-            'proposed_start_date' =>  "required|date_format:Y-m-d|after_or_equal:'.$todayDate'",
-            'description' => 'required|string|min:20',
-            'title' => 'required|string|min:10',
-            'duration' => 'required|string',
-            'address' => 'required_if:model,2|exclude_if:model,1|string|min:10',
-        ]);
-    }
-
-    private function validateProjectUpdateRequest($request)
-    {
-        $todayDate = date('Y-m-d');
-
-        return $request->validate([
-            'project_id' => 'required|exists:projects,id',
-            'task_id' => 'sometimes|integer|exists:tasks,id',
-            'sub_task_id' => 'sometimes|integer|exists:sub_tasks,id',
-            'country_id' => 'sometimes|integer|exists:countries,id',
-            'region_id' => 'sometimes|integer|exists:regions,id',
-            'city_id' => 'sometimes|integer|exists:cities,id',
-
-            'model' => 'sometimes|integer|min:1|max:2',
-            'num_of_taskMaster' => 'sometimes|integer|min:1|max:10',
-            'budget' => 'sometimes|numeric|min:1000',
-            'experience' => 'sometimes|integer|min:1|max:5',
-            'proposed_start_date' =>  "sometimes|date_format:Y-m-d|after_or_equal:'.$todayDate'",
-            'description' => 'sometimes|string',
-            'title' => 'sometimes|string|min:10',
-            'duration' => 'sometimes|string',
-            'address' => 'sometimes|string|min:10',
-        ]);
-    }
 
     private function validateSearchRequest(Request $request)
     {
@@ -294,21 +286,14 @@ class ProjectController extends Controller
         $searchTerm = $request->searchTerm;
         $lookUp = ["my_drafts", "my_cancelled_projects", "my_completed_projects", "my_running_projects", "my_favourites", "my_projects", "my_published_projects"];
 
-        if (in_array($searchTerm, $lookUp) == false) {
+        if (!in_array($searchTerm, $lookUp)) {
             return ResponseHelper::invalidRoute("Invalid identifier '{$searchTerm}'");
         }
 
         $projects = $this->{$searchTerm}($request->user());
 
-        if ($projects->count() < 1) {
-            return ResponseHelper::sendSuccess([]);
-        }
-
-        return ResponseHelper::sendSuccess(
-            $projects
-                ->with(Config::get('protectedWith.project'))
-                ->latest()
-                ->paginate($this->limit)
+        return $this->paginateMe(
+            $projects->with(Config::get('protectedWith.project'))
         );
     }
 

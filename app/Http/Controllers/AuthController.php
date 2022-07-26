@@ -107,7 +107,7 @@ class AuthController extends Controller
         $user = Auth::user();
         $token = $user->createToken('user')->plainTextToken;
 
-        NotifyHelper::talkTo($user,  "login");
+        // NotifyHelper::talkTo($user,  "login");
         return ResponseHelper::sendSuccess(
             ['token' => $token, 'user' => $user],
             "logged in successfully"
